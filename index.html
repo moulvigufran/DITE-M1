@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 
+      NEWLY ADDED CONTENT SECURITY POLICY (CSP) 
+      This helps secure your application by restricting where content (scripts, styles, etc.) can be loaded from.
+      It helps prevent attacks like Cross-Site Scripting (XSS).
+    -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://cdn.tailwindcss.com 'unsafe-inline';
+        style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+        font-src 'self' https://fonts.gstatic.com;
+        connect-src 'self' https://script.google.com;
+        img-src 'self' data:;
+        frame-ancestors 'none';
+    ">
+
+    <title>Personal Health &amp; Macro Planner</title>
+
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.4s ease;
+        }
+
+        /* Define Theme Colors */
+        :root {
+            --color-primary: #375d81; /* Deep Indigo/Teal */
+            --color-secondary: #06b6d4; /* Cyan/Teal Accent */
+        }
+
+        /* --- Base Theme Styling (Defaults to Light) --- */
+        body {
+            background-color: #eef2ff; /* Very light lavender */
+        }
+        .main-card {
+            background-color: white;
+            box-shadow: 0 20px 40px -5px rgba(10, 20, 40, 0.2);
+            border: 1px solid #e0e7ff;
+        }
+        .input-group input, .input-group select {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+            transition: all 0.2s ease;
+        }
+        /* Adjusted result-box gradient to be slightly less opaque for better contrast with 3 boxes */
+        .result-box {
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+            border-color: #06b6d4;
+            color: #0e7490;
+        }
+
+        /* --- Dark Mode Overrides --- */
+        .dark {
+            --color-primary: #5c85a6;
+            --color-secondary: #22d3ee;
+            background-color: #1f2937; /* Dark Slate Gray */
+            color: #e5e7eb; /* Light Gray text */
+        }
+
+        .dark .main-card {
+            background-color: #374151; /* Medium Slate Gray */
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid #4b5563;
+        }
+
+        .dark .input-group input, .dark .input-group select {
+            background-color: #4b5563;
+            border-color: #6b7280;
+            color: #e5e7eb;
+        }
+        
+        .dark .result-box {
+            background: linear-gradient(135deg, #1e3a8a, #104e8b); /* Darker blue gradient */
+            border-color: #60a5fa;
+            color: #bfdbfe;
+        }
+
+        /* --- BMI Status Box Colors --- */
+        .bmi-status-base {
+            border: 4px solid;
+        }
+        .bmi-normal {
+            background: linear-gradient(135deg, #dcfce7, #a7f3d0);
+            border-color: #22c55e;
+            color: #15803d;
+        }
+        .dark .bmi-normal {
+            background: linear-gradient(135deg, #166534, #14532d);
+            border-color: #4ade80;
+            color: #dcfce7;
+        }
+        .bmi-underweight {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-color: #eab308;
+            color: #a16207;
+        }
+        .dark .bmi-underweight {
+            background: linear-gradient(135deg, #854d0e, #713f12);
+            border-color: #facc15;
+            color: #fef3c7;
+        }
+        .bmi-overweight {
+            background: linear-gradient(135deg, #ffedd5, #fed7aa);
+            border-color: #f97316;
+            color: #c2410c;
+        }
+        .dark .bmi-overweight {
+            background: linear-gradient(135deg, #9a3412, #7c2d12);
+            border-color: #fb923c;
+            color: #ffedd5;
+        }
+        .bmi-obese {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-color: #ef4444;
+            color: #b91c1c;
+        }
+        .dark .bmi-obese {
+            background: linear-gradient(135deg, #991b1b, #7f1d1d);
+            border-color: #f87171;
+            color: #fee2e2;
+        }
+
+        /* General Utility Classes */
+        .text-primary-color { color: var(--color-primary); }
+        .bg-primary-color { background-color: var(--color-primary); }
+        .text-secondary-color { color: var(--color-secondary); }
+        .focus\:ring-secondary-color:focus { --tw-ring-color: var(--color-secondary); }
+        .focus\:border-secondary-color:focus { border-color: var(--color-secondary); }
+        .border-primary-color { border-color: var(--color-primary); }
+
+        /* Animation for results */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* How it works modal text alignment */
+        .message-text-left {
+            text-align: left;
+            white-space: pre-wrap; /* Allows line breaks */
+        }
+
+        /* Print Specific Styles */
+        @media print {
+            /* Hide all non-report content (Website UI) */
+            body > *:not(#printContent) {
+                display: none !important;
+            }
+
+            /* Make the report content visible and full-width */
+            #printContent {
+                display: block !important;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                color: black !important; /* Ensure black text for printing */
+                font-family: Arial, sans-serif !important;
+            }
+            
+            /* Reset background for print */
+            body {
+                background-color: white !important;
+            }
+
+            /* Ensure internal print styles are used */
+            #printContent h2 { color: #06b6d4 !important; border-bottom: 1px solid #ccc; padding-bottom: 5pt; }
+        }
+
+        /* Style for the hidden print container on screen */
+        .print-only {
+            display: none;
+        }
+    </style>
+    <!-- Configure Tailwind to use our custom colors -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-color': 'var(--color-primary)',
+                        'secondary-color': 'var(--color-secondary)',
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="flex flex-col items-center justify-start min-h-screen p-4 sm:p-6">
+
+    <!-- Main Application Card -->
+    <div class="main-card w-full max-w-4xl p-6 sm:p-10 rounded-3xl mt-8 mb-8 transition-all duration-300">
+        
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-primary-color dark:text-secondary-color leading-tight">
+                Health &amp; Macro Planner
+            </h1>
+            
+            <div class="flex items-center space-x-2 relative">
+                <!-- Login Icon (No Function) -->
+                <button title="Login" class="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shadow-md hover:shadow-lg transition-all duration-300 cursor-not-allowed opacity-70">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A1.875 1.875 0 0 1 17.25 22.5H6.75a1.875 1.875 0 0 1-2.25-2.382Z"></path>
+                    </svg>
+                </button>
+
+                <!-- Theme Toggle (Moved Back Out) -->
+                <button id="themeToggle" class="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-yellow-300 shadow-md hover:shadow-lg transition-all duration-300">
+                    <svg id="sunIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"></path></svg>
+                    <svg id="moonIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+
+                <!-- Settings Icon -->
+                <button id="settingsToggleBtn" title="Settings" class="p-3 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-blue-400 shadow-md hover:shadow-lg transition-all duration-300">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456c.516-.193 1.058.156 1.266.648l1.39 2.404c.209.362.023.854-.34 1.06l-1.036.751c-.366.266-.569.709-.569 1.181s.203.915.569 1.181l1.036.751c.363.206.549.698.34 1.06l-1.39 2.404c-.208.492-.75.841-1.266.648l-1.217-.456c-.355-.133-.75-.072-1.075.124a3.99 3.99 0 0 1-.22.127c-.332.185-.582.496-.645.87l-.213 1.281c-.09.543-.56.941-1.11.941h-2.593c-.55 0-1.02-.398-1.11-.941l-.213-1.281c-.063-.374-.313-.686-.645-.87a3.99 3.99 0 0 1-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456c-.516.193-1.058-.156-1.266-.648l-1.39-2.404c-.209-.362-.023-.854.34-1.06l1.036-.751c.366-.266.569-.709.569-1.181s-.203-.915-.569-1.181l-1.036-.751c-.363-.206-.549-.698-.34-1.06l1.39-2.404c.208.492.75.841 1.266.648l1.217.456c.355.133.75.072 1.075.124.073-.044.146-.087.22-.127.332-.185.582.496.645.87l.213-1.281Z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+                    </svg>
+                </button>
+
+                <!-- Settings Popover -->
+                <div id="settingsPopover" class="hidden absolute top-16 right-0 z-20 w-72 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border dark:border-gray-700 p-4 transform transition-all scale-95 opacity-0">
+                    <div class="flex justify-between items-center mb-4">
+                        <p class="text-lg font-bold text-gray-800 dark:text-gray-200">Settings</p>
+                        <button id="closeSettingsBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label for="prefixHospitalName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Default Hospital Name</label>
+                        <input type="text" id="prefixHospitalName" class="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., General Wellness Clinic" maxlength="100">
+                        <button id="saveSettingsBtn" class="w-full px-4 py-2 bg-primary-color text-white rounded-lg font-semibold hover:bg-secondary-color transition-colors duration-300">
+                            Save Prefix
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <p class="text-gray-600 dark:text-gray-400 mb-4">Calculate your daily energy needs (TDEE), BMI, and optimize your macro intake.</p>
+        <button id="howItWorksBtn" class="text-sm text-primary-color dark:text-secondary-color font-medium hover:underline mb-8">
+            How is this calculated?
+        </button>
+
+        <!-- Input Form -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            
+            <!-- Age Input -->
+            <div class="input-group">
+                <label for="age" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age (Years)</label>
+                <input type="number" id="age" value="30" min="15" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 30">
+            </div>
+            
+            <!-- Gender Selection -->
+            <div class="input-group">
+                <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
+                <select id="gender" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+
+            <!-- Height Input -->
+            <div class="input-group">
+                <label for="height" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Height (cm)</label>
+                <input type="number" id="height" value="175" min="100" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 175">
+            </div>
+
+            <!-- Weight Input -->
+            <div class="input-group">
+                <label for="weight" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Weight (kg)</label>
+                <input type="number" id="weight" value="70" min="40" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 70">
+            </div>
+
+            <!-- Activity Level (ICMR PALs) -->
+            <div class="input-group md:col-span-2">
+                <label for="activity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activity Level (ICMR PAL)</label>
+                <select id="activity" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
+                    <option value="1.45">Sedentary (mostly sitting, light activity)</option>
+                    <option value="1.75" selected>Moderately Active (moderate activity/sports)</option>
+                    <option value="2.10">Heavy (hard daily exercise/physical job)</option>
+                </select>
+            </div>
+            
+            <!-- Pregnancy Status (Conditional) -->
+            <div id="pregnancyStatusGroup" class="input-group md:col-span-2 hidden">
+                <label for="pregnancyStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pregnancy / Lactation Status</label>
+                <select id="pregnancyStatus" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
+                    <option value="none" selected>not pregnant</option>
+                    <option value="1st_trimester">Pregnant (1st Trimester)</option>
+                    <option value="2nd_trimester">Pregnant (2nd Trimester)</option>
+                    <option value="3rd_trimester">Pregnant (3rd Trimester)</option>
+                    <option value="lactating_0_6">Lactating (0-6 months)</option>
+                    <option value="lactating_7_12">Lactating (7-12 months)</option>
+                </select>
+            </div>
+            
+        </div>
+
+        <!-- Goal Selection -->
+        <div class="mb-8">
+            <h3 class="text-lg font-bold text-primary-color dark:text-gray-200 mb-3">Goal</h3>
+            <div class="flex flex-wrap gap-4">
+                <button data-goal="maintain" class="goal-btn px-6 py-3 rounded-xl border border-primary-color hover:bg-primary-color hover:text-white transition-all duration-300 text-sm font-semibold dark:text-gray-200 dark:border-gray-500 bg-primary-color text-white dark:bg-secondary-color dark:text-gray-900" onclick="setGoal('maintain')">
+                    Maintain Weight
+                </button>
+                <button data-goal="mild-cut" class="goal-btn px-6 py-3 rounded-xl border border-primary-color hover:bg-primary-color hover:text-white transition-all duration-300 text-sm font-semibold dark:text-gray-200 dark:border-gray-500" onclick="setGoal('mild-cut')">
+                    Mild Cut (-250 kcal)
+                </button>
+                <button data-goal="aggressive-cut" class="goal-btn px-6 py-3 rounded-xl border border-primary-color hover:bg-primary-color hover:text-white transition-all duration-300 text-sm font-semibold dark:text-gray-200 dark:border-gray-500" onclick="setGoal('aggressive-cut')">
+                    Aggressive Cut (-500 kcal)
+                </button>
+                <button data-goal="mild-bulk" class="goal-btn px-6 py-3 rounded-xl border border-primary-color hover:bg-primary-color hover:text-white transition-all duration-300 text-sm font-semibold dark:text-gray-200 dark:border-gray-500" onclick="setGoal('mild-bulk')">
+                    Mild Bulk (+250 kcal)
+                </button>
+                <button data-goal="aggressive-bulk" class="goal-btn px-6 py-3 rounded-xl border border-primary-color hover:bg-primary-color hover:text-white transition-all duration-300 text-sm font-semibold dark:text-gray-200 dark:border-gray-500" onclick="setGoal('aggressive-bulk')">
+                    Aggressive Bulk (+500 kcal)
+                </button>
+            </div>
+            <input type="hidden" id="goal" value="maintain">
+        </div>
+
+        <!-- Action Buttons (Calculate and Print) -->
+        <div class="flex justify-center mb-10 space-x-4">
+            <button onclick="calculateMacros()" class="w-full max-w-sm py-4 bg-primary-color text-white text-lg font-bold rounded-xl hover:bg-secondary-color transition-colors duration-300 shadow-xl dark:shadow-none transform hover:scale-[1.02]">
+                Calculate Plan
+            </button>
+            <button id="printReportBtn" onclick="openPrintModal()" disabled class="w-full max-w-sm py-4 bg-gray-400 text-white text-lg font-bold rounded-xl transition-colors duration-300 shadow-xl dark:shadow-none transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
+                Print Report
+            </button>
+        </div>
+
+        <!-- Results Display -->
+        <div id="results" class="hidden">
+            <h2 class="text-3xl font-bold text-secondary-color dark:text-secondary-color mb-6">Your Daily Plan</h2>
+
+            <!-- NEW BMI Status Box -->
+            <div id="bmiStatusBox" class="bmi-status-base p-6 rounded-2xl mb-8 transition-all duration-300 shadow-xl">
+                <p class="text-sm font-semibold opacity-80 mb-1 text-center">Your BMI Status</p>
+                <p id="bmiStatusText" class="text-3xl font-extrabold text-center"></p>
+            </div>
+
+            <!-- Calorie & TDEE & BMI Results -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                <!-- 1. BMI Result -->
+                <div class="p-6 rounded-2xl border-4 result-box transition-all duration-300 shadow-xl dark:shadow-none">
+                    <p class="text-sm font-semibold opacity-80 mb-1">Your BMI</p>
+                    <p id="bmiResult" class="text-3xl font-extrabold"></p>
+                </div>
+
+                <!-- 2. BMR Result -->
+                <div class="p-6 rounded-2xl border-4 result-box transition-all duration-300 shadow-xl dark:shadow-none">
+                    <p class="text-sm font-semibold opacity-80 mb-1">Your Calculated BMR</p>
+                    <p id="bmrResult" class="text-3xl font-extrabold"></p>
+                    <p class="text-sm opacity-80">calories/day (Resting Energy)</p>
+                </div>
+                
+                <!-- 3. TDEE Result -->
+                <div class="p-6 rounded-2xl border-4 result-box transition-all duration-300 shadow-xl dark:shadow-none">
+                    <p class="text-sm font-semibold opacity-80 mb-1">Maintenance Calories (TDEE)</p>
+                    <p id="tdeeResult" class="text-3xl font-extrabold"></p>
+                    <p class="text-sm opacity-80">calories/day (Total Daily Energy Expenditure)</p>
+                </div>
+            </div>
+
+            <!-- Target Macro Plan -->
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-inner border border-gray-200 dark:border-gray-700">
+                <h3 id="targetHeader" class="text-2xl font-bold text-primary-color dark:text-secondary-color mb-5">Target Calories: Maintain Weight</h3>
+                
+                <p id="targetCalories" class="text-4xl font-extrabold text-center text-primary-color dark:text-white mb-6"></p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <!-- Protein -->
+                    <div class="bg-white dark:bg-gray-700 p-4 rounded-xl shadow-md border-l-4 border-red-500">
+                        <p class="text-lg font-bold text-red-500 mb-1">Protein</p>
+                        <p id="proteinResult" class="text-2xl font-extrabold text-gray-900 dark:text-white"></p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">grams / day (4 kcal/g)</p>
+                    </div>
+                    <!-- Fat -->
+                    <div class="bg-white dark:bg-gray-700 p-4 rounded-xl shadow-md border-l-4 border-yellow-500">
+                        <p class="text-lg font-bold text-yellow-500 mb-1">Fat</p>
+                        <p id="fatResult" class="text-2xl font-extrabold text-gray-900 dark:text-white"></p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">grams / day (9 kcal/g)</p>
+                    </div>
+                    <!-- Carbs -->
+                    <div class="bg-white dark:bg-gray-700 p-4 rounded-xl shadow-md border-l-4 border-green-500">
+                        <p class="text-lg font-bold text-green-500 mb-1">Carbohydrates</p>
+                        <p id="carbResult" class="text-2xl font-extrabold text-gray-900 dark:text-white"></p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">grams / day (4 kcal/g)</p>
+                    </div>
+                </div>
+                
+                <p class="mt-6 text-xs text-gray-500 dark:text-gray-400 italic text-center">
+                    ICMR (2020) Recommended Macro split: Protein 15%, Fat 25%, Carbs 60% of total calories.
+                </p>
+            </div>
+            
+            <!-- Micronutrient Plan -->
+            <div id="micronutrientPlan" class="bg-gray-50 dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-inner border border-gray-200 dark:border-gray-700 mt-8">
+                <h3 class="text-2xl font-bold text-primary-color dark:text-secondary-color mb-5">Key Micronutrient Targets (ICMR 2020 RDA)</h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Fiber -->
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded-xl shadow-md border-l-4 border-blue-500">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Fiber (AI)</p>
+                        <p id="fiberRDI" class="text-lg font-bold text-blue-500"></p>
+                    </div>
+                    <!-- Sodium -->
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded-xl shadow-md border-l-4 border-red-600">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Sodium (AI)</p>
+                        <p id="sodiumRDI" class="text-lg font-bold text-red-600"></p>
+                    </div>
+                    <!-- Potassium -->
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded-xl shadow-md border-l-4 border-orange-500">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Potassium (AI)</p>
+                        <p id="potassiumRDI" class="text-lg font-bold text-orange-500"></p>
+                    </div>
+                    <!-- Iron -->
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded-xl shadow-md border-l-4 border-indigo-500">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Iron (RDA)</p>
+                        <p id="ironRDI" class="text-lg font-bold text-indigo-500"></p>
+                    </div>
+                    <!-- Vitamin C -->
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded-xl shadow-md border-l-4 border-lime-500">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Vitamin C (RDA)</p>
+                        <p id="vitcRDI" class="text-lg font-bold text-lime-500"></p>
+                    </div>
+                    <!-- Folate -->
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded-xl shadow-md border-l-4 border-pink-500">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Folate (RDA)</p>
+                        <p id="folateRDI" class="text-lg font-bold text-pink-500"></p>
+                    </div>
+                    <!-- Calcium -->
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded-xl shadow-md border-l-4 border-purple-500">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Calcium (RDA)</p>
+                        <p id="calciumRDI" class="text-lg font-bold text-purple-500"></p>
+                    </div>
+                    <!-- Magnesium -->
+                    <div class="bg-white dark:bg-gray-700 p-3 rounded-xl shadow-md border-l-4 border-teal-500">
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Magnesium (RDA)</p>
+                        <p id="magnesiumRDI" class="text-lg font-bold text-teal-500"></p>
+                    </div>
+                </div>
+                
+                <p class="mt-6 text-xs text-gray-500 dark:text-gray-400 italic text-center">
+                    Micronutrient values are Recommended Daily Allowances (RDA) or Adequate Intakes (AI) for adults based on ICMR (2020) and may vary based on individual needs.
+                </p>
+            </div>
+            
+        </div>
+        
+        <!-- ICMR Footer Note -->
+        <p class="mt-10 text-xs text-gray-500 dark:text-gray-400 italic text-center">
+            All calculations are based on the ICMR (2020) guidelines for Indians.
+        </p>
+    </div>
+
+    <!-- Message Box/Modal (Used instead of alert/confirm) -->
+    <div id="messageBox" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl w-full max-w-lg shadow-2xl transform scale-95 transition-all duration-300">
+            <h3 id="messageTitle" class="text-xl font-bold text-primary-color dark:text-secondary-color mb-3">Notice</h3>
+            <div id="messageText" class="text-gray-700 dark:text-gray-300 mb-5 overflow-y-auto max-h-60">Please ensure all fields are filled with valid numbers.</div>
+            <div class="flex justify-end">
+                <button onclick="closeMessageBox()" class="px-5 py-2 bg-primary-color text-white rounded-lg font-semibold hover:bg-secondary-color transition-colors duration-300">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Input Modal -->
+    <div id="printModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl w-full max-w-md shadow-2xl transform scale-95 transition-all duration-300">
+            <h3 class="text-xl font-bold text-primary-color dark:text-secondary-color mb-4">Generate Health Report</h3>
+            
+            <div class="mb-4">
+                <label for="reporterName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Name</label>
+                <input type="text" id="reporterName" class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., Jane Doe" maxlength="100">
+            </div>
+            
+            <div class="mb-6">
+                <label for="hospitalName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Institution / Hospital Name</label>
+                <input type="text" id="hospitalName" class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., General Wellness Clinic" maxlength="100">
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button onclick="closePrintModal()" class="px-5 py-2 text-gray-600 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">
+                    Cancel
+                </button>
+                <button onclick="prepareAndPrintReport()" class="px-5 py-2 bg-primary-color text-white rounded-lg font-semibold hover:bg-secondary-color transition-colors duration-300">
+                    Generate &amp; Send Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Print Content Area (Structured for clean printing) -->
+    <div id="printContent" class="hidden print-only">
+        <!-- Content will be injected here by JavaScript before printing -->
+    </div>
+
+    <script>
+        // --- Initialization and State ---
+        let currentGoal = 'maintain';
+        let lastCalculationResults = null; // Store results for printing
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz0pmnPRCAVBJwQ67GmssNA2NHaIvPsIIVg7PxE1AOUyLyQennzVSRtKj64R65EuiI/exec';
+        
+        const goalModifiers = {
+            'maintain': 0,
+            'mild-cut': -250,
+            'aggressive-cut': -500,
+            'mild-bulk': 250,
+            'aggressive-bulk': 500
+        };
+        const goalLabels = {
+            'maintain': 'Maintain Weight',
+            'mild-cut': 'Mild Weight Loss (-250 kcal)',
+            'aggressive-cut': 'Aggressive Weight Loss (-500 kcal)',
+            'mild-bulk': 'Mild Muscle Gain (+250 kcal)',
+            'aggressive-bulk': 'Aggressive Muscle Gain (+500 kcal)'
+        };
+        // Calorie modifiers for pregnancy/lactation (ICMR 2020)
+        const pregnancyModifiers = {
+            'none': { calories: 0, label: '' },
+            '1st_trimester': { calories: 0, label: 'Pregnant (1st Trimester)' },
+            '2nd_trimester': { calories: 350, label: 'Pregnant (2nd Trimester)' },
+            '3rd_trimester': { calories: 550, label: 'Pregnant (3rd Trimester)' },
+            'lactating_0_6': { calories: 600, label: 'Lactating (0-6 mo)' },
+            'lactating_7_12': { calories: 520, label: 'Lactating (7-12 mo)' }
+        };
+
+
+        // --- Theme Toggling ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        // Function to set the theme
+        function setTheme(isDark) {
+            if (isDark) {
+                body.classList.add('dark');
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark');
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Apply saved theme on load, defaulting to light
+        if (localStorage.getItem('theme') === 'dark') {
+            setTheme(true);
+        } else {
+            setTheme(false);
+        }
+
+        // Toggle handler
+        themeToggle?.addEventListener('click', () => {
+            const isDark = body.classList.contains('dark');
+            setTheme(!isDark);
+        });
+        
+        // --- Gender-based Input Toggling ---
+        const genderSelect = document.getElementById('gender');
+        const pregnancyGroup = document.getElementById('pregnancyStatusGroup');
+
+        genderSelect?.addEventListener('change', (e) => {
+            if (e.target.value === 'female') {
+                pregnancyGroup?.classList.remove('hidden');
+            } else {
+                pregnancyGroup?.classList.add('hidden');
+                // Reset pregnancy status if gender is switched to male
+                safeGetElement('pregnancyStatus').value = 'none';
+            }
+        });
+
+        // --- Settings Popover ---
+        const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+        const settingsPopover = document.getElementById('settingsPopover');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const prefixHospitalInput = document.getElementById('prefixHospitalName');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+
+        function toggleSettingsPopover(show) {
+            if (show) {
+                settingsPopover.classList.remove('hidden');
+                setTimeout(() => {
+                    settingsPopover.classList.remove('opacity-0', 'scale-95');
+                }, 10);
+            } else {
+                settingsPopover.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    settingsPopover.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // Toggle Popover
+        settingsToggleBtn?.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent click from bubbling up to document
+            const isHidden = settingsPopover.classList.contains('hidden');
+            toggleSettingsPopover(isHidden);
+        });
+        
+        // Close Button
+        closeSettingsBtn?.addEventListener('click', () => {
+             toggleSettingsPopover(false);
+        });
+
+        // Close Popover when clicking outside
+        document.addEventListener('click', (e) => {
+            if (settingsPopover && !settingsPopover.classList.contains('hidden')) {
+                if (!settingsPopover.contains(e.target) && !settingsToggleBtn.contains(e.target)) {
+                    toggleSettingsPopover(false);
+                }
+            }
+        });
+        
+        // Save Settings
+        saveSettingsBtn?.addEventListener('click', () => {
+            const hospitalName = prefixHospitalInput.value;
+            localStorage.setItem('prefixHospitalName', hospitalName);
+            toggleSettingsPopover(false);
+            showMessageBox("Settings Saved", `Default hospital name set to:\n"${hospitalName}"`);
+        });
+        
+        // Load Saved Settings on Page Load
+        document.addEventListener('DOMContentLoaded', () => {
+             const savedHospital = localStorage.getItem('prefixHospitalName');
+             if (savedHospital) {
+                 prefixHospitalInput.value = savedHospital;
+             }
+        });
+
+
+        // --- Modal/Message Box Functions (To replace alert/confirm) ---
+
+        function showMessageBox(title, message, isHtml = false) {
+            const messageTitle = document.getElementById('messageTitle');
+            const messageText = document.getElementById('messageText');
+            const messageBox = document.getElementById('messageBox');
+            
+            if (messageTitle) messageTitle.textContent = title;
+            
+            if (messageText) {
+                if (isHtml) {
+                    messageText.innerHTML = message;
+                    messageText.classList.add('message-text-left');
+                } else {
+                    messageText.textContent = message;
+                    messageText.classList.remove('message-text-left');
+                }
+            }
+
+
+            if (messageBox) {
+                messageBox.classList.remove('hidden');
+                setTimeout(() => {
+                    messageBox.classList.add('opacity-100');
+                    messageBox.querySelector('div')?.classList.remove('scale-95');
+                }, 10);
+            }
+        }
+
+        function closeMessageBox() {
+            const messageBox = document.getElementById('messageBox');
+            if (messageBox) {
+                messageBox.classList.remove('opacity-100');
+                messageBox.querySelector('div')?.classList.add('scale-95');
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 300);
+            }
+        }
+        
+        // --- "How it Works" Modal ---
+        const howItWorksBtn = document.getElementById('howItWorksBtn');
+        howItWorksBtn?.addEventListener('click', showHowItWorks);
+        
+        function showHowItWorks() {
+            const title = "How We Calculate Your Plan";
+            const message = `
+All calculations are based on the **ICMR (2020) Guidelines for Indians**.
+
+1.  **BMR (Basal Metabolic Rate):**
+    Your resting energy is calculated using the Mifflin-St Jeor formula, which is highly accurate for most adults:
+    *(10 × weight in kg) + (6.25 × height in cm) - (5 × age in years) + (Gender modifier)*
+    • **Male:** +5
+    • **Female:** -161
+
+2.  **TDEE (Total Daily Energy Expenditure):**
+    Your BMR is multiplied by an ICMR-specific Physical Activity Level (PAL) to find your total daily "maintenance" calories:
+    • **Sedentary:** BMR × 1.45
+    • **Moderate:** BMR × 1.75
+    • **Heavy:** BMR × 2.10
+
+3.  **Target Calories:**
+    Your selected goal (e.g., "Mild Cut -250 kcal") is applied to your TDEE. For pregnancy & lactation, ICMR-recommended calories are added.
+
+4.  **Macronutrients:**
+    Your target calories are split according to the ICMR (2020) recommended ratio for a balanced diet:
+    • **Protein:** 15%
+    • **Fat:** 25%
+    • **Carbohydrates:** 60%
+
+5.  **Micronutrients:**
+    All RDI (Recommended Daily Allowance) and AI (Adequate Intake) values are sourced from the ICMR 2020 report, adjusting for gender, pregnancy, and lactation status.
+            `;
+            // Use 'true' to indicate the message is HTML (for formatting)
+            showMessageBox(title, message.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'), true);
+        }
+
+
+        // --- Print Modal Functions ---
+
+        function openPrintModal() {
+            const modal = safeGetElement('printModal');
+            if (!lastCalculationResults) {
+                showMessageBox("Error", "Please calculate your plan before generating a report.");
+                return;
+            }
+
+            if (modal) {
+                // Pre-fill hospital name from localStorage
+                const savedHospital = localStorage.getItem('prefixHospitalName');
+                if (savedHospital) {
+                    safeGetElement('hospitalName').value = savedHospital;
+                }
+                
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('opacity-100');
+                    modal.querySelector('div')?.classList.remove('scale-95');
+                }, 10);
+                // Optionally focus first input
+                safeGetElement('reporterName')?.focus();
+            }
+        }
+
+        function closePrintModal() {
+            const modal = safeGetElement('printModal');
+            if (modal) {
+                modal.classList.remove('opacity-100');
+                modal.querySelector('div')?.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+        
+        /**
+         * Sanitizes user input to prevent XSS.
+         * Replaces <, >, &, ", ' with their HTML entity equivalents.
+         */
+        function sanitizeInput(str) {
+            if (!str) return "";
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#039;');
+        }
+
+        /**
+         * Gathers data, generates print-friendly HTML, opens in a new tab, and sends data to Google Sheet.
+         */
+        async function prepareAndPrintReport() {
+            if (!lastCalculationResults) {
+                closePrintModal();
+                showMessageBox("Error", "Calculation data missing. Please recalculate your plan.");
+                return;
+            }
+
+            // Sanitize user input from the modal
+            const name = sanitizeInput(safeGetElement('reporterName').value.trim());
+            const hospital = sanitizeInput(safeGetElement('hospitalName').value.trim());
+
+            if (name === "" || hospital === "") {
+                showMessageBox("Input Required", "Please enter Your Name and the Institution/Hospital Name to generate the report.");
+                return;
+            }
+
+            const results = lastCalculationResults;
+            const now = new Date();
+            const reportDate = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const reportTimestamp = now.toISOString();
+
+            // --- 1. Send data to Google Sheet (Fire and Forget) ---
+            const reportData = {
+                timestamp: reportTimestamp,
+                reporterName: name,
+                institution: hospital,
+                goal: results.goalLabel,
+                pregnancyStatus: results.pregnancyStatusLabel,
+                age: results.age,
+                gender: results.gender,
+                height: results.height,
+                weight: results.weight,
+                activity: results.activityLabel,
+                bmi: results.bmi,
+                bmiCategory: results.bmiCategory,
+                bmr: results.bmr,
+                tdee: results.tdee,
+                targetCalories: results.targetCalories,
+                proteinGrams: results.proteinGrams,
+                fatGrams: results.fatGrams,
+                carbGrams: results.carbGrams,
+                rdi_fiber: results.rdi.fiber,
+                rdi_sodium: results.rdi.sodium,
+                rdi_potassium: results.rdi.potassium,
+                rdi_iron: results.rdi.iron,
+                rdi_vitC: results.rdi.vitC,
+                rdi_folate: results.rdi.folate,
+                rdi_calcium: results.rdi.calcium,
+                rdi_magnesium: results.rdi.magnesium
+            };
+
+            try {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reportData)
+                });
+            } catch (error) {
+                console.error("Error sending data to Google Sheet:", error);
+            }
+
+            // --- 2. Generate and open printable report in a new tab ---
+            
+            // Helper for Profile List
+            const createProfileItem = (icon, label, value) => `
+                <li class="profile-item">
+                    ${icon}
+                    <span class="profile-label">${label}</span>
+                    <span class="profile-value">${value}</span>
+                </li>
+            `;
+            
+            // Helper for Micro Table
+            const createMicroRow = (label, value) => `
+                <tr class="micro-item">
+                    <td class="micro-label">${label}</td>
+                    <td class="micro-value">${value}</td>
+                </tr>
+            `;
+
+            // Helper for BMI Status Box
+            const getBmiStatusClassAndColor = (category) => {
+                switch (category) {
+                    case 'Normal Weight':
+                        return { class: 'bmi-normal', color: '#15803d' };
+                    case 'Underweight':
+                        return { class: 'bmi-underweight', color: '#a16207' };
+                    case 'Overweight':
+                        return { class: 'bmi-overweight', color: '#c2410c' };
+                    case 'Obese':
+                        return { class: 'bmi-obese', color: '#b91c1c' };
+                    default:
+                        return { class: 'bmi-normal', color: '#15803d' };
+                }
+            };
+            
+            const bmiStatusStyle = getBmiStatusClassAndColor(results.bmiCategory);
+
+            // Helper for Stat Box
+            const createStatBox = (label, value, subtext, color) => `
+                <div class="stat-box" style="border-color: ${color};">
+                    <div class="stat-label">${label}</div>
+                    <div class="stat-value" style="color: ${color};">${value}</div>
+                    ${subtext ? `<div class="stat-subtext">${subtext}</div>` : ''}
+                </div>
+            `;
+
+
+            const reportHTML = `
+                <html>
+                <head>
+                    <title>Health Report for ${name}</title>
+                    <style>
+                        @page {
+                            size: A4;
+                            margin: 1.5cm; /* Reduced margins for A4 */
+                        }
+                        body { 
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+                            margin: 0; 
+                            padding: 0; 
+                            background-color: #f4f7f6; /* Lighter gray */
+                            color: #333; 
+                            font-size: 10pt;
+                        }
+                        .print-btn-container { 
+                            position: sticky; 
+                            top: 0; 
+                            background: #fff; 
+                            padding: 12px 20px; 
+                            border-bottom: 1px solid #e0e0e0; 
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+                            text-align: right; 
+                            z-index: 100;
+                        }
+                        .print-btn { 
+                            background-color: #375d81; 
+                            color: white; 
+                            padding: 9px 16px; 
+                            border: none; 
+                            border-radius: 8px; 
+                            font-size: 14px;
+                            font-weight: 600; 
+                            cursor: pointer; 
+                            transition: background-color 0.3s; 
+                        }
+                        .print-btn:hover { background-color: #06b6d4; }
+                        
+                        .container { 
+                            max-width: 1100px; /* Wider container for 2-col */
+                            margin: 20px auto; 
+                            padding: 0 20px;
+                        }
+                        
+                        /* --- Header --- */
+                        .header {
+                            display: flex;
+                            align-items: center;
+                            padding: 20px;
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            border: 1px solid #e2e8f0;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+                            margin-bottom: 20px;
+                        }
+                        .logo { width: 50px; height: 50px; margin-right: 20px; flex-shrink: 0; }
+                        .header-info { font-size: 11pt; color: #555; }
+                        .header-info h1 { font-size: 22pt; color: #375d81; margin: 0 0 5px 0; font-weight: 700; }
+                        .header-info strong { color: #333; }
+                        .header-info .highlight {
+                            font-weight: 700;
+                            color: #375d81;
+                        }
+
+                        /* --- Layout --- */
+                        .report-layout {
+                            display: grid;
+                            grid-template-columns: 1fr 320px; /* Main column and sidebar */
+                            gap: 20px;
+                        }
+                        .main-column { display: flex; flex-direction: column; gap: 20px; }
+                        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+                        /* --- Card Base Style --- */
+                        .card {
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            border: 1px solid #e2e8f0;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+                            overflow: hidden; /* For progress bars */
+                        }
+                        .card-header {
+                            padding: 16px 20px;
+                            border-bottom: 1px solid #e2e8f0;
+                        }
+                        .card-title {
+                            font-size: 14pt;
+                            font-weight: 600;
+                            color: #375d81;
+                        }
+                        .card-body {
+                            padding: 20px;
+                        }
+
+                        /* --- Card: Goal --- */
+                        .goal-card .value {
+                            font-size: 2.5rem; /* 40px */
+                            font-weight: 700;
+                            color: #375d81;
+                            line-height: 1.1;
+                        }
+                        .goal-card .label {
+                            font-size: 1rem; /* 16px */
+                            font-weight: 500;
+                            color: #555;
+                            margin-top: 4px;
+                        }
+                        .goal-card .status {
+                            font-size: 0.875rem; /* 14px */
+                            font-weight: 600;
+                            padding: 4px 10px;
+                            border-radius: 20px;
+                            background-color: #e0f7fa;
+                            color: #0e7490;
+                            display: inline-block;
+                            margin-top: 12px;
+                        }
+                        
+                        /* --- NEW: BMI Status Box (Report) --- */
+                        .bmi-status-box {
+                            padding: 16px 20px;
+                            border-radius: 12px;
+                            text-align: center;
+                            border: 2px solid;
+                        }
+                        .bmi-status-box .label {
+                            font-size: 10pt;
+                            font-weight: 500;
+                            opacity: 0.8;
+                            margin-bottom: 2px;
+                        }
+                        .bmi-status-box .value {
+                            font-size: 1.75rem; /* 28px */
+                            font-weight: 700;
+                            line-height: 1.2;
+                        }
+                        .bmi-normal { background-color: #f0fdf4; border-color: #22c55e; color: #15803d; }
+                        .bmi-underweight { background-color: #fefce8; border-color: #eab308; color: #a16207; }
+                        .bmi-overweight { background-color: #fff7ed; border-color: #f97316; color: #c2410c; }
+                        .bmi-obese { background-color: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+
+                        /* --- NEW: Stat Boxes (BMI, BMR, TDEE) --- */
+                        .stats-grid {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr);
+                            gap: 16px;
+                        }
+                        .stat-box {
+                            background-color: #f8fafc;
+                            border: 1px solid #e2e8f0;
+                            border-left-width: 4px;
+                            border-radius: 8px;
+                            padding: 12px 16px;
+                        }
+                        .stat-label {
+                            font-size: 9pt;
+                            font-weight: 500;
+                            color: #555;
+                            margin-bottom: 2px;
+                        }
+                        .stat-value {
+                            font-size: 1.5rem; /* 24px */
+                            font-weight: 700;
+                            line-height: 1.2;
+                        }
+                        .stat-subtext {
+                            font-size: 8pt;
+                            color: #777;
+                        }
+
+                        /* --- Card: Macros --- */
+                        .macro-list { list-style: none; padding: 0; margin: 0; space-y: 16px; }
+                        .macro-item { display: flex; align-items: center; gap: 12px; }
+                        .macro-info { flex: 1; }
+                        .macro-label { font-size: 11pt; font-weight: 600; color: #333; }
+                        .macro-grams { font-size: 10pt; color: #777; }
+                        .macro-cals { font-size: 12pt; font-weight: 700; white-space: nowrap; }
+                        
+                        .progress-bar {
+                            height: 10px;
+                            width: 100%;
+                            background-color: #e2e8f0;
+                            border-radius: 5px;
+                            overflow: hidden;
+                            margin-top: 4px;
+                        }
+                        .progress-fill {
+                            height: 100%;
+                            border-radius: 5px;
+                        }
+                        .progress-fill.protein { background-color: #ef4444; width: 15%; }
+                        .progress-fill.fat { background-color: #eab308; width: 25%; }
+                        .progress-fill.carbs { background-color: #22c55e; width: 60%; }
+
+                        /* --- Card: Profile (Sidebar) --- */
+                        .profile-list { list-style: none; padding: 0; margin: 0; }
+                        .profile-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            padding: 10px 0;
+                            border-bottom: 1px solid #f1f5f9;
+                        }
+                        .profile-list li:last-child { border-bottom: none; }
+                        .profile-icon {
+                            width: 20px;
+                            height: 20px;
+                            stroke: #5c85a6;
+                            flex-shrink: 0;
+                        }
+                        .profile-label { font-weight: 500; color: #555; }
+                        .profile-value { font-weight: 600; color: #333; margin-left: auto; text-align: right; }
+                        
+                        /* --- Card: Micros (Sidebar) --- */
+                        .micro-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        .micro-item {
+                            border-bottom: 1px solid #f1f5f9;
+                        }
+                        .micro-item:last-child {
+                            border-bottom: none;
+                        }
+                        .micro-label {
+                            font-size: 10pt;
+                            font-weight: 500;
+                            color: #555;
+                            padding: 8px 0;
+                            text-align: left;
+                        }
+                        .micro-value {
+                            font-size: 10pt;
+                            font-weight: 600;
+                            color: #333;
+                            padding: 8px 0;
+                            text-align: right;
+                        }
+
+                        /* --- Footer --- */
+                        .footer { 
+                            text-align: center; 
+                            font-size: 9pt; 
+                            color: #888; 
+                            padding: 20px 0; 
+                            margin-top: 20px;
+                            border-top: 1px solid #e2e8f0; 
+                        }
+
+                        /* --- Print-Specific Styles --- */
+                        @media print {
+                            body { background-color: #fff; padding: 0; margin: 0; font-size: 10pt; }
+                            .print-btn-container { display: none; }
+                            .container { max-width: 100%; margin: 0; padding: 0; }
+                            
+                            .header, .card {
+                                box-shadow: none;
+                                border: 1px solid #ccc;
+                                border-radius: 0;
+                                margin-bottom: 15px;
+                            }
+                            .header { padding: 15px; }
+                            .header-info h1 { font-size: 20pt; }
+                            .logo { width: 40px; height: 40px; margin-right: 15px; }
+
+                            /* Force single column */
+                            .report-layout {
+                                display: block;
+                            }
+                            .main-column, .sidebar {
+                                display: block;
+                            }
+                            
+                            .card { page-break-inside: avoid; }
+                            .card-header { padding: 12px 15px; }
+                            .card-title { font-size: 13pt; }
+                            .card-body { padding: 15px; }
+
+                            .goal-card .value { font-size: 2rem; }
+                            .goal-card .label { font-size: 0.9rem; }
+                            
+                            .progress-bar { display: none; } /* Hide visual bars for print */
+                            
+                            .profile-list { column-count: 1; }
+                            .profile-item { padding: 8px 0; }
+                            
+                            .micro-table { page-break-inside: avoid; }
+                            .micro-label, .micro-value { padding: 6px 0; }
+                            
+                            .footer { padding-top: 15px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <!-- Icons SVG Definitions -->
+                    <svg width="0" height="0" style="display: none;">
+                        <defs>
+                            <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></symbol>
+                            <symbol id="icon-height" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-6M12 8V2M4 12H2M22 12h-2M12 17l-3 3-3-3M12 7l3-3 3 3"></path></symbol>
+                            <symbol id="icon-weight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"></path><path d="M9 12a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v6"></path><path d="M12 18v.01"></path><path d="M12 9a.5.5 0 0 0-.5-.5h0a.5.5 0 0 0-.5.5v0a.5.5 0 0 0 .5.5h0a.5.5 0 0 0 .5-.5z"></path></circle></symbol>
+                            <symbol id="icon-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 18H3.78a2 2 0 0 1-1.79-1.11L.01 12.11c-.1-.24-.1-.5 0-.74l1.98-4.76A2 2 0 0 1 3.78 6h8.44c.42 0 .82.14 1.14.38l6.34 4.26c.4.27.64.71.64 1.18v0c0 .47-.24.91-.64 1.18l-6.34 4.26a2 2 0 0 1-1.14.38z"></path><path d="m21.99 12.11-1.98-4.76"></path><path d="M3.78 6l1.98 4.76"></path><path d="M12 12h.01"></path></symbol>
+                        </defs>
+                    </svg>
+
+                    <div class="print-btn-container">
+                        <button class="print-btn" onclick="window.print()">Print Report</button>
+                    </div>
+
+                    <div class="container">
+                        <header class="header">
+                            <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="#375d81" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h.008v.008H12V7.5z" />
+                            </svg>
+                            <div class="header-info">
+                                <h1>Personal Health Report</h1>
+                                <strong class="highlight">Client Name:</strong> ${name}<br>
+                                <strong class="highlight">Institution:</strong> ${hospital}<br>
+                                <strong>Report Date:</strong> ${reportDate}
+                            </div>
+                        </header>
+
+                        <div class="report-layout">
+                            <!-- Main Column -->
+                            <div class="main-column">
+
+                                <!-- NEW: BMI Status Box -->
+                                <div class="bmi-status-box ${bmiStatusStyle.class}" style="color: ${bmiStatusStyle.color}; border-color: ${bmiStatusStyle.color};">
+                                    <div class="label">Your BMI Status</div>
+                                    <div class="value">${results.bmiCategory}</div>
+                                </div>
+
+                                <!-- NEW: Stats Grid -->
+                                <div class="stats-grid">
+                                    ${createStatBox('Your BMI', results.bmi, '', '#06b6d4')}
+                                    ${createStatBox('Your BMR', results.bmr, 'kcal/day (Resting)', '#06b6d4')}
+                                    ${createStatBox('TDEE', results.tdee, 'kcal/day (Maintenance)', '#06b6d4')}
+                                </div>
+                            
+                                <!-- Goal Card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h2 class="card-title">Daily Calorie Goal</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="value">${results.targetCalories} <span class="text-2xl font-medium">kcal</span></div>
+                                        <div class="label">Total Daily Intake</div>
+                                        <div class="status">${results.goalLabel}</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Macros Card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h2 class="card-title">Macronutrient Breakdown (15/25/60)</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="macro-list">
+                                            <li class="macro-item">
+                                                <div class="macro-info">
+                                                    <div class="macro-label">Protein (15%)</div>
+                                                    <div class="macro-grams">${Math.round(results.proteinGrams * 4)} kcal</div>
+                                                    <div class="progress-bar"><div class="progress-fill protein"></div></div>
+                                                </div>
+                                                <div class="macro-cals">${results.proteinGrams} g</div>
+                                            </li>
+                                            <li class="macro-item">
+                                                <div class="macro-info">
+                                                    <div class="macro-label">Fat (25%)</div>
+                                                    <div class="macro-grams">${Math.round(results.fatGrams * 9)} kcal</div>
+                                                    <div class="progress-bar"><div class="progress-fill fat"></div></div>
+                                                </div>
+                                                <div class="macro-cals">${results.fatGrams} g</div>
+                                            </li>
+                                            <li class="macro-item">
+                                                <div class="macro-info">
+                                                    <div class="macro-label">Carbohydrates (60%)</div>
+                                                    <div class="macro-grams">${Math.round(results.carbGrams * 4)} kcal</div>
+                                                    <div class="progress-bar"><div class="progress-fill carbs"></div></div>
+                                                </div>
+                                                <div class="macro-cals">${results.carbGrams} g</div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sidebar -->
+                            <div class="sidebar">
+                                <!-- Profile Card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h2 class="card-title">Client Profile & Stats</h2>
+                                    </div>
+                                    <div class="card-body" style="padding: 10px 20px;">
+                                        <ul class="profile-list">
+                                            ${createProfileItem('<svg class="profile-icon"><use href="#icon-user"></use></svg>', 'Age / Gender', `${results.age} / ${results.gender === 'male' ? 'Male' : 'Female'}`)}
+                                            ${createProfileItem('<svg class="profile-icon"><use href="#icon-height"></use></svg>', 'Height', `${results.height} cm`)}
+                                            ${createProfileItem('<svg class="profile-icon"><use href="#icon-weight"></use></svg>', 'Weight', `${results.weight} kg`)}
+                                            ${results.pregnancyStatusLabel ? createProfileItem('<svg class="profile-icon"><use href="#icon-user"></use></svg>', 'Status', `${results.pregnancyStatusLabel}`) : ''}
+                                            ${createProfileItem('<svg class="profile-icon"><use href="#icon-activity"></use></svg>', 'Activity', `${results.activityLabel}`)}
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <!-- Micros Card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h2 class="card-title">Micronutrient RDAs</h2>
+                                    </div>
+                                    <div class="card-body" style="padding: 10px 20px 12px;">
+                                        <table class="micro-table">
+                                            <tbody>
+                                                ${createMicroRow('Fiber (AI)', results.rdi.fiber)}
+                                                ${createMicroRow('Sodium (AI)', results.rdi.sodium)}
+                                                ${createMicroRow('Potassium (AI)', results.rdi.potassium)}
+                                                ${createMicroRow('Iron (RDA)', results.rdi.iron)}
+                                                ${createMicroRow('Vitamin C (RDA)', results.rdi.vitC)}
+                                                ${createMicroRow('Folate (RDA)', results.rdi.folate)}
+                                                ${createMicroRow('Calcium (RDA)', results.rdi.calcium)}
+                                                ${createMicroRow('Magnesium (RDA)', results.rdi.magnesium)}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <footer class="footer">
+                            Calculations are based on the ICMR (2020) guidelines for Indians.<br>
+                            This report is for informational purposes only and not a substitute for professional medical advice.
+                        </footer>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            // Open the HTML in a new tab
+            const newTab = window.open();
+            if (newTab) {
+                newTab.document.open();
+                newTab.document.write(reportHTML);
+                newTab.document.close();
+            } else {
+                showMessageBox("Popup Blocked", "Your browser blocked the report tab. Please allow popups for this site.");
+            }
+
+            // Close the input modal
+            closePrintModal();
+        }
+
+
+        // --- Core Planner Logic ---
+
+        function setGoal(goal) {
+            currentGoal = goal;
+            const goalInput = document.getElementById('goal');
+            if(goalInput) goalInput.value = goal;
+            
+            // Update button styles
+            document.querySelectorAll('.goal-btn').forEach(button => {
+                if (button.disabled) return; // Don't change style of disabled buttons
+                button.classList.remove('bg-primary-color', 'text-white', 'dark:bg-secondary-color', 'dark:text-gray-900');
+                button.classList.add('bg-transparent', 'text-primary-color', 'dark:text-gray-200');
+            });
+            
+            const selectedButton = document.querySelector(`[data-goal="${goal}"]`);
+            if (selectedButton && !selectedButton.disabled) {
+                selectedButton.classList.remove('bg-transparent', 'text-primary-color', 'dark:text-gray-200');
+                selectedButton.classList.add('bg-primary-color', 'text-white', 'dark:bg-secondary-color', 'dark:text-gray-900');
+            }
+        }
+
+        // Initialize goal button styling
+        setGoal(currentGoal);
+        
+        // UTILITY: Safely retrieve an element by ID
+        function safeGetElement(id) {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.error(`Element with ID "${id}" not found.`);
+                // Return a dummy element with a 'value' property to prevent crashes
+                return { value: '', classList: { add: () => {}, remove: () => {} }, options: [], selectedIndex: -1 };
+            }
+            return element;
+        }
+
+        /**
+         * Calculates BMR, TDEE, BMI, Macros, and RDI.
+         */
+        function calculateBMR(weight, height, age, gender) {
+            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+            if (gender === 'male') {
+                bmr += 5;
+            } else {
+                bmr -= 161;
+            }
+            return Math.round(bmr);
+        }
+
+        function getBmiCategory(bmi) {
+            if (bmi < 18.5) return "Underweight";
+            if (bmi >= 18.5 && bmi <= 22.9) return "Normal Weight"; // ICMR Asian-specific
+            if (bmi >= 23.0 && bmi <= 24.9) return "Overweight";
+            return "Obese";
+        }
+        
+        function getMicronutrientRDI(gender, pregnancyStatus) {
+            const isMale = gender === 'male';
+            let rdi = {};
+
+            // ICMR 2020 RDAs (Moderately Active Adult)
+            if (isMale) {
+                rdi = {
+                    fiber: "40 g",
+                    sodium: "2000 mg",
+                    potassium: "3800 mg",
+                    iron: "19 mg",
+                    vitC: "80 mg",
+                    folate: "300 mcg",
+                    calcium: "1000 mg",
+                    magnesium: "385 mg"
+                };
+            } else {
+                // Base for non-pregnant, non-lactating female
+                rdi = {
+                    fiber: "30 g",
+                    sodium: "2000 mg",
+                    potassium: "3000 mg",
+                    iron: "29 mg", // Higher requirement for non-pregnant women 19-39
+                    vitC: "65 mg",
+                    folate: "220 mcg",
+                    calcium: "1000 mg",
+                    magnesium: "355 mg"
+                };
+            }
+
+            // Adjustments for Pregnancy (ICMR 2020)
+            switch (pregnancyStatus) {
+                case '1st_trimester':
+                case '2nd_trimester':
+                case '3rd_trimester':
+                    rdi.iron = "27 mg"; // RDA for pregnancy
+                    rdi.vitC = "80 mg";
+                    rdi.folate = "570 mcg";
+                    rdi.calcium = "1000 mg"; // Stays same
+                    rdi.magnesium = "355 mg"; // Stays same
+                    break;
+                case 'lactating_0_6':
+                    rdi.iron = "23 mg"; // Requirement drops post-partum
+                    rdi.vitC = "115 mg";
+                    rdi.folate = "330 mcg";
+                    rdi.calcium = "1200 mg"; // Higher requirement
+                    rdi.magnesium = "355 mg";
+                    break;
+                case 'lactating_7_12':
+                    rdi.iron = "23 mg";
+    
+                    rdi.vitC = "115 mg";
+                    rdi.folate = "330 mcg";
+                    rdi.calcium = "1200 mg";
+                    rdi.magnesium = "355 mg";
+                    break;
+            }
+
+            return rdi;
+        }
+
+
+        function calculateMacros() {
+            const age = parseFloat(safeGetElement('age')?.value);
+            const height = parseFloat(safeGetElement('height')?.value);
+            const weight = parseFloat(safeGetElement('weight')?.value);
+            const gender = safeGetElement('gender')?.value;
+            const activityFactor = parseFloat(safeGetElement('activity')?.value);
+            const activityLabel = safeGetElement('activity').options[safeGetElement('activity').selectedIndex].text;
+            let goal = safeGetElement('goal')?.value;
+            const pregnancyStatus = safeGetElement('pregnancyStatus')?.value;
+            
+            // Simple validation
+            if (isNaN(age) || isNaN(height) || isNaN(weight) || age <= 0 || height <= 0 || weight <= 0 || !activityFactor) {
+                showMessageBox("Input Error", "Please enter valid, positive values for age, height, and weight.");
+                // Disable print button on error
+                const printBtn = safeGetElement('printReportBtn');
+                if (printBtn) {
+                    printBtn.disabled = true;
+                    printBtn.classList.remove('bg-primary-color');
+                    printBtn.classList.add('bg-gray-400');
+                }
+                return;
+            }
+
+            // --- 1. BMI Calculation (ICMR specific) ---
+            const heightMeters = height / 100;
+            const bmiValue = weight / (heightMeters * heightMeters);
+            const roundedBmi = parseFloat(bmiValue.toFixed(1));
+            const bmiCategory = getBmiCategory(roundedBmi);
+
+
+            // --- 2. Calculate BMR & TDEE ---
+            const bmr = calculateBMR(weight, height, age, gender);
+            const tdee = Math.round(bmr * activityFactor);
+
+            // --- 3. Calculate Target Calories ---
+            
+            // Handle pregnancy adjustments
+            const pregMod = pregnancyModifiers[pregnancyStatus] || { calories: 0, label: '' };
+            const pregnancyStatusLabel = pregMod.label;
+            let calorieGoalModifier = goalModifiers[goal];
+
+            // Safety Check: Disable "Cut" goals if pregnant or lactating
+            const isPregnantOrLactating = gender === 'female' && pregnancyStatus !== 'none';
+            const cutButtons = document.querySelectorAll('[data-goal="mild-cut"], [data-goal="aggressive-cut"]');
+            
+            if (isPregnantOrLactating) {
+                // Disable cut buttons
+                cutButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                });
+                
+                // If a cut goal was selected, force it to 'maintain'
+                if (goal === 'mild-cut' || goal === 'aggressive-cut') {
+                    goal = 'maintain';
+                    setGoal('maintain'); // Update UI
+                    calorieGoalModifier = 0;
+                    showMessageBox("Goal Adjusted", "Weight loss (cut) goals are not recommended during pregnancy or lactation. Your goal has been set to 'Maintain Weight'.");
+                }
+            } else {
+                // Re-enable cut buttons if not pregnant
+                cutButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+            }
+
+
+            const targetCalories = Math.round(tdee + calorieGoalModifier + pregMod.calories);
+
+            // --- 4. Calculate Macros (ICMR 15/25/60 split: Protein/Fat/Carbs) ---
+            
+            // Grams from calories (Protein/Carbs: 4 kcal/g, Fat: 9 kcal/g)
+            const proteinGrams = Math.round((targetCalories * 0.15) / 4);
+            const fatGrams = Math.round((targetCalories * 0.25) / 9);
+            const carbGrams = Math.round((targetCalories * 0.60) / 4);
+            
+            // --- 5. Calculate Micronutrients ---
+            const rdi = getMicronutrientRDI(gender, pregnancyStatus);
+
+
+            // --- 6. Store Results for Printing ---
+            lastCalculationResults = {
+                age: age,
+                gender: gender,
+                height: height,
+                weight: weight,
+                activity: activityFactor,
+                activityLabel: activityLabel,
+                goal: goal,
+                pregnancyStatus: pregnancyStatus,
+                pregnancyStatusLabel: pregnancyStatusLabel,
+                bmi: roundedBmi,
+                bmiCategory: bmiCategory,
+                bmr: bmr,
+                tdee: tdee,
+                targetCalories: targetCalories,
+                proteinGrams: proteinGrams,
+                fatGrams: fatGrams,
+                carbGrams: carbGrams,
+                rdi: rdi,
+                goalLabel: goalLabels[goal] + (pregMod.calories > 0 ? ` + ${pregMod.calories} kcal` : '')
+            };
+
+
+            // --- 7. Display Results ---
+            if(safeGetElement('bmiResult')) safeGetElement('bmiResult').textContent = `${roundedBmi}`;
+            if(safeGetElement('bmrResult')) safeGetElement('bmrResult').textContent = `${bmr}`;
+            if(safeGetElement('tdeeResult')) safeGetElement('tdeeResult').textContent = `${tdee}`;
+
+            // NEW: Update BMI Status Box
+            const statusBox = safeGetElement('bmiStatusBox');
+            const statusText = safeGetElement('bmiStatusText');
+            
+            if (statusBox && statusText) {
+                statusText.textContent = bmiCategory;
+                
+                // Remove old classes
+                statusBox.classList.remove('bmi-normal', 'bmi-underweight', 'bmi-overweight', 'bmi-obese');
+                
+                // Add new class based on category
+                if (bmiCategory === 'Normal Weight') {
+                    statusBox.classList.add('bmi-normal');
+                } else if (bmiCategory === 'Underweight') {
+                    statusBox.classList.add('bmi-underweight');
+                } else if (bmiCategory === 'Overweight') {
+                    statusBox.classList.add('bmi-overweight');
+                } else { // Obese
+                    statusBox.classList.add('bmi-obese');
+                }
+            }
+
+            if(safeGetElement('targetHeader')) safeGetElement('targetHeader').textContent = `Target Calories: ${goalLabels[goal].split('(')[0].trim()}`;
+            if(safeGetElement('targetCalories')) safeGetElement('targetCalories').textContent = `${targetCalories} Calories / Day`;
+            if(safeGetElement('proteinResult')) safeGetElement('proteinResult').textContent = `${proteinGrams} g`;
+            if(safeGetElement('fatResult')) safeGetElement('fatResult').textContent = `${fatGrams} g`;
+            if(safeGetElement('carbResult')) safeGetElement('carbResult').textContent = `${carbGrams} g`;
+            
+            if(safeGetElement('fiberRDI')) safeGetElement('fiberRDI').textContent = rdi.fiber;
+            if(safeGetElement('sodiumRDI')) safeGetElement('sodiumRDI').textContent = rdi.sodium;
+            if(safeGetElement('potassiumRDI')) safeGetElement('potassiumRDI').textContent = rdi.potassium;
+            if(safeGetElement('ironRDI')) safeGetElement('ironRDI').textContent = rdi.iron;
+            if(safeGetElement('vitcRDI')) safeGetElement('vitcRDI').textContent = rdi.vitC;
+            if(safeGetElement('folateRDI')) safeGetElement('folateRDI').textContent = rdi.folate;
+            if(safeGetElement('calciumRDI')) safeGetElement('calciumRDI').textContent = rdi.calcium;
+            if(safeGetElement('magnesiumRDI')) safeGetElement('magnesiumRDI').textContent = rdi.magnesium;
+
+
+            // Show results section with fade-in
+            const resultsSection = safeGetElement('results');
+            if (resultsSection) {
+                resultsSection.classList.remove('hidden');
+                resultsSection.classList.add('fade-in');
+            }
+            
+            // Enable Print Button after successful calculation
+            const printBtn = safeGetElement('printReportBtn');
+            if (printBtn) {
+                printBtn.disabled = false;
+                printBtn.classList.remove('bg-gray-400');
+                printBtn.classList.add('bg-primary-color');
+            }
+        }
+    </script>
+
+</body>
+</html>
+
