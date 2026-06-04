@@ -185,7 +185,8 @@
     </style>
     <!-- Configure Tailwind to use our custom colors -->
     <script>
-        tailwind.config = {
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
@@ -355,6 +356,16 @@
             <div id="bmiStatusBox" class="bmi-status-base p-6 rounded-2xl mb-8 transition-all duration-300 shadow-xl">
                 <p class="text-sm font-semibold opacity-80 mb-1 text-center">Your BMI Status</p>
                 <p id="bmiStatusText" class="text-3xl font-extrabold text-center"></p>
+
+                <!-- NEW: Weight Change Goal Container -->
+                <div id="weightChangeContainer" class="mt-5 hidden max-w-sm mx-auto">
+                    <p id="weightChangeLabel" class="text-sm font-medium opacity-90 mb-1 text-center"></p>
+                    <p id="weightChangeValue" class="text-2xl font-extrabold text-center mb-2 tracking-wide"></p>
+                    <!-- Visual Bar -->
+                    <div class="w-full bg-black/10 dark:bg-white/20 h-2.5 rounded-full overflow-hidden mt-1 shadow-inner">
+                        <div id="weightChangeBar" class="h-full rounded-full transition-all duration-1000 ease-out w-0"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Calorie & TDEE & BMI Results -->
@@ -1228,6 +1239,17 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
                                 <div class="bmi-status-box ${bmiStatusStyle.class}" style="color: ${bmiStatusStyle.color}; border-color: ${bmiStatusStyle.color};">
                                     <div class="label">Your BMI Status</div>
                                     <div class="value">${results.bmiCategory}</div>
+                                    ${results.weightChangeType !== 'normal' ? `
+                                        <div style="margin-top: 14px; font-size: 0.9em; opacity: 0.9;">
+                                            To reach Normal BMI, ${results.weightChangeType === 'gain' ? 'gain' : 'lose'}:
+                                            <div style="font-size: 1.6em; font-weight: bold; margin-top: 4px;">
+                                                ${results.weightChangeType === 'gain' ? '+' : '-'}${results.weightDiff.toFixed(1)} kg
+                                            </div>
+                                            <div style="width: 100%; height: 6px; background-color: rgba(0,0,0,0.1); border-radius: 3px; margin-top: 8px; overflow: hidden; max-width: 250px; margin-left: auto; margin-right: auto;">
+                                                <div style="width: ${Math.min(100, Math.max(10, (results.weightDiff / 40) * 100))}%; height: 100%; background-color: ${bmiStatusStyle.color}; border-radius: 3px;"></div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                 </div>
 
                                 <!-- NEW: Stats Grid -->
@@ -1380,7 +1402,7 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
             if (!element) {
                 console.error(`Element with ID "${id}" not found.`);
                 // Return a dummy element with a 'value' property to prevent crashes
-                return { value: '', classList: { add: () => {}, remove: () => {} }, options: [], selectedIndex: -1 };
+                return { value: '', classList: { add: () => {}, remove: () => {} }, options: [], selectedIndex: -1, style: {} };
             }
             return element;
         }
@@ -1496,6 +1518,22 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
             const roundedBmi = parseFloat(bmiValue.toFixed(1));
             const bmiCategory = getBmiCategory(roundedBmi);
 
+            // --- 1.5 Calculate weight change needed for normal BMI ---
+            const minNormalBMI = 18.5;
+            const maxNormalBMI = 22.9;
+            let weightDiff = 0;
+            let weightChangeType = 'normal'; // 'gain', 'lose', 'normal'
+
+            if (roundedBmi < minNormalBMI) {
+                const targetWeight = minNormalBMI * heightMeters * heightMeters;
+                weightDiff = targetWeight - weight;
+                weightChangeType = 'gain';
+            } else if (roundedBmi > maxNormalBMI) {
+                const targetWeight = maxNormalBMI * heightMeters * heightMeters;
+                weightDiff = weight - targetWeight;
+                weightChangeType = 'lose';
+            }
+
 
             // --- 2. Calculate BMR & TDEE ---
             const bmr = calculateBMR(weight, height, age, gender);
@@ -1561,6 +1599,8 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
                 pregnancyStatusLabel: pregnancyStatusLabel,
                 bmi: roundedBmi,
                 bmiCategory: bmiCategory,
+                weightDiff: weightDiff,
+                weightChangeType: weightChangeType,
                 bmr: bmr,
                 tdee: tdee,
                 targetCalories: targetCalories,
@@ -1577,9 +1617,13 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
             if(safeGetElement('bmrResult')) safeGetElement('bmrResult').textContent = `${bmr}`;
             if(safeGetElement('tdeeResult')) safeGetElement('tdeeResult').textContent = `${tdee}`;
 
-            // NEW: Update BMI Status Box
+            // NEW: Update BMI Status Box & Weight Change Metric
             const statusBox = safeGetElement('bmiStatusBox');
             const statusText = safeGetElement('bmiStatusText');
+            const weightChangeContainer = safeGetElement('weightChangeContainer');
+            const weightChangeLabel = safeGetElement('weightChangeLabel');
+            const weightChangeValue = safeGetElement('weightChangeValue');
+            const weightChangeBar = safeGetElement('weightChangeBar');
             
             if (statusBox && statusText) {
                 statusText.textContent = bmiCategory;
@@ -1596,6 +1640,36 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
                     statusBox.classList.add('bmi-overweight');
                 } else { // Obese
                     statusBox.classList.add('bmi-obese');
+                }
+
+                // Show/Hide and populate the weight change requirement
+                if (weightChangeContainer && weightChangeLabel && weightChangeValue && weightChangeBar) {
+                    // Reset bar width for animation
+                    weightChangeBar.style.width = '0%';
+
+                    if (weightChangeType === 'normal') {
+                        weightChangeContainer.classList.add('hidden');
+                    } else {
+                        weightChangeContainer.classList.remove('hidden');
+                        const diffStr = weightDiff.toFixed(1) + ' kg';
+                        
+                        // Calculate a nice relative bar width for the visual element (max out at 100% for ~40kg difference)
+                        const barPercentage = Math.min(100, Math.max(10, (weightDiff / 40) * 100));
+
+                        if (weightChangeType === 'gain') {
+                            weightChangeLabel.textContent = "To reach Normal BMI (18.5), gain:";
+                            weightChangeValue.textContent = "+" + diffStr;
+                        } else {
+                            weightChangeLabel.textContent = "To reach Normal BMI (22.9), lose:";
+                            weightChangeValue.textContent = "-" + diffStr;
+                        }
+
+                        // Delay bar width update for smooth transition effect
+                        setTimeout(() => {
+                            weightChangeBar.style.width = barPercentage + "%";
+                            weightChangeBar.style.backgroundColor = "currentColor"; // Matches the container text color
+                        }, 50);
+                    }
                 }
             }
 
@@ -1634,4 +1708,3 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
 
 </body>
 </html>
-
