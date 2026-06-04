@@ -532,7 +532,7 @@
         // --- Initialization and State ---
         let currentGoal = 'maintain';
         let lastCalculationResults = null; // Store results for printing
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtfP2Ww27N_nEgCrkz2JguDQvc3pLqDXTJHZiun1qlRu6laL-YrIRog4sF-RifbCE/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfl_3sT0n3T4QmIl9ZXmslfKj6LRZfkaa6ASh72bHPLvietnyhnc976J91YVoL7-wQ/exec';
         
         const goalModifiers = {
             'maintain': 0,
@@ -852,10 +852,10 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
                     method: 'POST',
                     mode: 'no-cors', 
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'text/plain;charset=utf-8',
                     },
                     body: JSON.stringify(reportData)
-                });
+                }).then(() => console.log("Request sent to Google Sheet"));
             } catch (error) {
                 console.error("Error sending data to Google Sheet:", error);
             }
