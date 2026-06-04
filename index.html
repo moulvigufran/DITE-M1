@@ -49,6 +49,7 @@
         .input-group input, .input-group select {
             background-color: #f9fafb;
             border-color: #d1d5db;
+            color: #111827; /* Explicit dark text color for inputs in light mode */
             transition: all 0.2s ease;
         }
         /* Adjusted result-box gradient to be slightly less opaque for better contrast with 3 boxes */
@@ -245,7 +246,7 @@
 
                     <div class="space-y-3">
                         <label for="prefixHospitalName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Default Hospital Name</label>
-                        <input type="text" id="prefixHospitalName" class="w-full p-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., General Wellness Clinic" maxlength="100">
+                        <input type="text" id="prefixHospitalName" class="w-full p-2 border border-gray-300 rounded-lg text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., General Wellness Clinic" maxlength="100">
                         <button id="saveSettingsBtn" class="w-full px-4 py-2 bg-primary-color text-white rounded-lg font-semibold hover:bg-secondary-color transition-colors duration-300">
                             Save Prefix
                         </button>
@@ -265,14 +266,14 @@
             
             <!-- Age Input -->
             <div class="input-group">
-                <label for="age" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age (Years)</label>
-                <input type="number" id="age" value="30" min="15" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 30">
+                <label for="age" class="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">Age (Years)</label>
+                <input type="number" id="age" value="30" min="15" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 30">
             </div>
             
             <!-- Gender Selection -->
             <div class="input-group">
-                <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
-                <select id="gender" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
+                <label for="gender" class="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">Gender</label>
+                <select id="gender" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                 </select>
@@ -280,20 +281,20 @@
 
             <!-- Height Input -->
             <div class="input-group">
-                <label for="height" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Height (cm)</label>
-                <input type="number" id="height" value="175" min="100" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 175">
+                <label for="height" class="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">Height (cm)</label>
+                <input type="number" id="height" value="175" min="100" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 175">
             </div>
 
             <!-- Weight Input -->
             <div class="input-group">
-                <label for="weight" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Weight (kg)</label>
-                <input type="number" id="weight" value="70" min="40" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 70">
+                <label for="weight" class="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">Weight (kg)</label>
+                <input type="number" id="weight" value="70" min="40" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g. 70">
             </div>
 
             <!-- Activity Level (ICMR PALs) -->
             <div class="input-group md:col-span-2">
-                <label for="activity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activity Level (ICMR PAL)</label>
-                <select id="activity" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
+                <label for="activity" class="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">Activity Level (ICMR PAL)</label>
+                <select id="activity" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
                     <option value="1.45">Sedentary (mostly sitting, light activity)</option>
                     <option value="1.75" selected>Moderately Active (moderate activity/sports)</option>
                     <option value="2.10">Heavy (hard daily exercise/physical job)</option>
@@ -302,8 +303,8 @@
             
             <!-- Pregnancy Status (Conditional) -->
             <div id="pregnancyStatusGroup" class="input-group md:col-span-2 hidden">
-                <label for="pregnancyStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pregnancy / Lactation Status</label>
-                <select id="pregnancyStatus" class="w-full p-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
+                <label for="pregnancyStatus" class="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">Pregnancy / Lactation Status</label>
+                <select id="pregnancyStatus" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
                     <option value="none" selected>not pregnant</option>
                     <option value="1st_trimester">Pregnant (1st Trimester)</option>
                     <option value="2nd_trimester">Pregnant (2nd Trimester)</option>
@@ -503,12 +504,12 @@
             
             <div class="mb-4">
                 <label for="reporterName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Name</label>
-                <input type="text" id="reporterName" class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., Jane Doe" maxlength="100">
+                <input type="text" id="reporterName" class="w-full p-3 border border-gray-300 rounded-lg text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., Jane Doe" maxlength="100">
             </div>
             
             <div class="mb-6">
                 <label for="hospitalName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Institution / Hospital Name</label>
-                <input type="text" id="hospitalName" class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., General Wellness Clinic" maxlength="100">
+                <input type="text" id="hospitalName" class="w-full p-3 border border-gray-300 rounded-lg text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color" placeholder="e.g., General Wellness Clinic" maxlength="100">
             </div>
 
             <div class="flex justify-end space-x-3">
@@ -531,7 +532,7 @@
         // --- Initialization and State ---
         let currentGoal = 'maintain';
         let lastCalculationResults = null; // Store results for printing
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz0pmnPRCAVBJwQ67GmssNA2NHaIvPsIIVg7PxE1AOUyLyQennzVSRtKj64R65EuiI/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtfP2Ww27N_nEgCrkz2JguDQvc3pLqDXTJHZiun1qlRu6laL-YrIRog4sF-RifbCE/exec';
         
         const goalModifiers = {
             'maintain': 0,
@@ -556,7 +557,6 @@
             'lactating_0_6': { calories: 600, label: 'Lactating (0-6 mo)' },
             'lactating_7_12': { calories: 520, label: 'Lactating (7-12 mo)' }
         };
-
 
         // --- Theme Toggling ---
         const themeToggle = document.getElementById('themeToggle');
@@ -684,7 +684,6 @@
                 }
             }
 
-
             if (messageBox) {
                 messageBox.classList.remove('hidden');
                 setTimeout(() => {
@@ -741,7 +740,6 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
             // Use 'true' to indicate the message is HTML (for formatting)
             showMessageBox(title, message.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'), true);
         }
-
 
         // --- Print Modal Functions ---
 
@@ -831,6 +829,8 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
                 activity: results.activityLabel,
                 bmi: results.bmi,
                 bmiCategory: results.bmiCategory,
+                weightChangeType: results.weightChangeType,
+                weightDiff: results.weightDiff,
                 bmr: results.bmr,
                 tdee: results.tdee,
                 targetCalories: results.targetCalories,
@@ -1371,7 +1371,6 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
             closePrintModal();
         }
 
-
         // --- Core Planner Logic ---
 
         function setGoal(goal) {
@@ -1487,7 +1486,6 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
 
             return rdi;
         }
-
 
         function calculateMacros() {
             const age = parseFloat(safeGetElement('age')?.value);
@@ -1687,7 +1685,6 @@ All calculations are based on the **ICMR (2020) Guidelines for Indians**.
             if(safeGetElement('folateRDI')) safeGetElement('folateRDI').textContent = rdi.folate;
             if(safeGetElement('calciumRDI')) safeGetElement('calciumRDI').textContent = rdi.calcium;
             if(safeGetElement('magnesiumRDI')) safeGetElement('magnesiumRDI').textContent = rdi.magnesium;
-
 
             // Show results section with fade-in
             const resultsSection = safeGetElement('results');
