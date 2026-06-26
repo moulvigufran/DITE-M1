@@ -1,0 +1,33 @@
+DITE-M1: Clinical Macro & Micro Planner 🩺
+DITE-M1 is an open-source, client-side clinical decision support tool designed to automate nutritional calculations based on the ICMR-NIN (2020) Recommended Dietary Allowances (RDA) for Indians.
+Developed specifically for high-volume Outpatient Departments (OPDs), Community Health Centres (CHCs), and nutritionists, this tool translates complex demographic and physiological data into instant, localized dietary targets.
+🌐 Live Application: Access DITE-M1 Here (https://moulvigufran.github.io/DITE-M1)
+🎯 The Clinical Problem
+While the ICMR 2020 guidelines provide highly accurate, localized nutritional data tailored to the Indian phenotype, manually calculating these parameters for individual patients is time-consuming. Factoring in distinct Physical Activity Levels (PAL), precise pregnancy/lactation trimesters, and varying BMI statuses takes minutes per patient—time that is often unavailable in busy clinical settings.
+💡 The Solution
+DITE-M1 automates these calculations instantly. By inputting basic patient demographics, clinicians can generate a hyper-personalized, printable dietary advice report in under 30 seconds.
+Key Features
+  Precision BMR & TDEE: Calculates energy requirements using ICMR reference data adjusted for PAL (Sedentary, Moderate, Heavy).
+  Physiological Stratification: Automatically adjusts macro and micronutrient requirements for Pregnancy (trimester-specific) and Lactation (month-specific).
+  Micronutrient Tracking: Highlights critical public health markers including Iron, Calcium, Folate, and Sodium based on the latest AI/RDA guidelines.
+  Zero-Data Retention: Fully client-side processing. No patient data is ever transmitted or stored on any server, ensuring strict compliance with patient privacy norms.
+  Offline Capability (PWA): Installable as a Progressive Web App, allowing seamless operation in rural clinics without internet connectivity.
+  Printable Reports: One-click PDF generation customized with the clinician's institutional branding.
+💻 Tech Stack
+  Frontend: HTML5, CSS3, Vanilla JavaScript (ES6+)
+  Architecture: Progressive Web App (PWA) with Service Worker caching
+  Hosting: GitHub Pages
+  Dependencies: None. Built entirely zero-dependency for maximum speed and security.
+🚀 How to Use (For Clinicians)
+1. Navigate to the Live Application (https://moulvigufran.github.io/DITE-M1).
+2. Input patient demographics (Age, Gender, Weight, Height, Activity Level, and Pregnancy/Lactation status).
+3. Select the clinical goal (e.g., Maintain Weight, Mild Cut for obesity management).
+4. Review the generated Macro (Protein/Carb/Fat) and Micro (Vitamins/Minerals) targets.
+5. Click "Generate Health Report" to print a customized diet chart for the patient.
+👨‍⚕️ Author & Development
+Developed by Moulvi Gufran MBBS Student, Government Medical College, Vizianagaram
+Vision: To bridge the gap between national public health guidelines and rapid bedside implementation through digital innovation.
+⚖️ Disclaimer & License
+Clinical Disclaimer: This software is a Clinical Decision Support System (CDSS) intended for educational and healthcare professional use. It does not replace independent professional clinical judgment.
+License: This project is licensed under the MIT License. See the ⁠LICENSE⁠ file for details.
+Note: Any redistribution or modification must retain attribution to the original author.
