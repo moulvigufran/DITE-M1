@@ -1,0 +1,17 @@
+{
+  "name": "DITE-M1 Clinical Macro Planner",
+  "short_name": "DITE-M1",
+  "description": "ICMR 2020 RDA Clinical Decision Support Tool",
+  "start_url": "/DITE-M1/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2966/2966327.png", 
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
