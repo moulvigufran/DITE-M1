@@ -1,5 +1,5 @@
 // Bump this version whenever index.html changes, so installed copies pick up the update.
-const CACHE_NAME = 'ditem1-cache-v2';
+const CACHE_NAME = 'ditem1-cache-v3';
 
 const ASSETS_TO_CACHE = [
   '/DITE-M1/',
