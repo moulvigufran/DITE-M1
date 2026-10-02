@@ -1,7 +1,3 @@
-    <title>DITE-M1 | By Moulvi Gufran</title>
-    <meta name="description" content="DITE-M1 interactive project interface. Developed by Moulvi Gufran.">
-    <meta name="author" content="Moulvi Gufran">
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +14,9 @@
         frame-ancestors 'none';
     ">
 
-    <title>Personal Health & Macro Planner</title>
+    <title>DITE-M1 | By Moulvi Gufran</title>
+    <meta name="description" content="DITE-M1 interactive project interface. Developed by Moulvi Gufran.">
+    <meta name="author" content="Moulvi Gufran">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -214,7 +212,7 @@
             <!-- Age Input -->
             <div class="input-group">
                 <label for="age" class="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">Age (Years)</label>
-                <input type="number" id="age" value="30" min="15" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
+                <input type="number" id="age" value="30" min="18" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
             </div>
             
             <!-- Gender Selection -->
@@ -242,9 +240,9 @@
             <div class="input-group md:col-span-2">
                 <label for="activity" class="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">Activity Level (ICMR PAL)</label>
                 <select id="activity" class="w-full p-3 border border-gray-300 rounded-xl text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-secondary-color focus:border-secondary-color">
-                    <option value="1.45">Sedentary (mostly sitting, light activity)</option>
-                    <option value="1.75" selected>Moderately Active (moderate activity/sports)</option>
-                    <option value="2.10">Heavy (hard daily exercise/physical job)</option>
+                    <option value="1.40">Sedentary (mostly sitting, light activity)</option>
+                    <option value="1.80" selected>Moderately Active (moderate activity/sports)</option>
+                    <option value="2.30">Heavy (hard daily exercise/physical job)</option>
                 </select>
             </div>
             
@@ -271,7 +269,7 @@
                     </label>
                     <label class="flex items-center space-x-2 cursor-pointer">
                         <input type="checkbox" id="ckdMode" class="form-checkbox w-5 h-5 text-secondary-color rounded focus:ring-secondary-color border-gray-300">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">CKD Mode <span class="text-xs text-gray-500">(Protein 0.6g-0.8g/kg)</span></span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">CKD Mode <span class="text-xs text-gray-500">(Protein 0.8g/kg)</span></span>
                     </label>
                 </div>
             </div>
@@ -527,13 +525,15 @@
             'aggressive-cut': 'Aggressive Weight Loss (-500 kcal)', 'mild-bulk': 'Mild Muscle Gain (+250 kcal)',
             'aggressive-bulk': 'Aggressive Muscle Gain (+500 kcal)'
         };
+        // ICMR-NIN 2020 additional energy (kcal/d) and protein (g/d, RDA) in pregnancy and lactation.
+        // NOTE: 2nd-trimester protein increment is quoted as +7.6 (EAR) / +9.5 (RDA) - confirm against the printed table.
         const pregnancyModifiers = {
-            'none': { calories: 0, label: '' },
-            '1st_trimester': { calories: 0, label: 'Pregnant (1st Trimester)' },
-            '2nd_trimester': { calories: 350, label: 'Pregnant (2nd Trimester)' },
-            '3rd_trimester': { calories: 550, label: 'Pregnant (3rd Trimester)' },
-            'lactating_0_6': { calories: 600, label: 'Lactating (0-6 mo)' },
-            'lactating_7_12': { calories: 520, label: 'Lactating (7-12 mo)' }
+            'none': { calories: 0, protein: 0, label: '' },
+            '1st_trimester': { calories: 0, protein: 0, label: 'Pregnant (1st Trimester)' },
+            '2nd_trimester': { calories: 350, protein: 9.5, label: 'Pregnant (2nd Trimester)' },
+            '3rd_trimester': { calories: 350, protein: 22, label: 'Pregnant (3rd Trimester)' },
+            'lactating_0_6': { calories: 600, protein: 16.9, label: 'Lactating (0-6 mo)' },
+            'lactating_7_12': { calories: 520, protein: 13.2, label: 'Lactating (7-12 mo)' }
         };
 
         // --- Theme Toggling ---
@@ -659,10 +659,10 @@
             const message = `
 Calculations follow **ICMR (2020) Guidelines for Indians**.
 
-1.  **BMR:** Mifflin-St Jeor formula (Resting Energy).
-2.  **TDEE:** BMR × Physical Activity Level (PAL).
-3.  **Target Calories:** Adjusted based on goal (Cut/Bulk) & Pregnancy status.
-4.  **Macros:** 15% Protein, 25% Fat, 60% Carbs (Standard). If **CKD Mode** is active, protein is restricted to 0.6-0.8g/kg.
+1.  **BMR:** FAO/WHO/UNU weight-based equation, reduced 10% (men) / 9% (women) for Indians as per ICMR-NIN 2020.
+2.  **TDEE:** BMR × Physical Activity Level (PAL: 1.4 / 1.8 / 2.3).
+3.  **Target Calories:** Adjusted based on goal (Cut/Bulk) & Pregnancy status. Never set below BMR.
+4.  **Macros:** 15% Protein, 25% Fat, 60% Carbs (Standard). Protein is never set below the ICMR RDA (0.83g/kg + pregnancy/lactation increment). If **CKD Mode** is active, protein is restricted to 0.8g/kg (non-dialysis only).
 5.  **Micros:** ICMR 2020 RDA/AI values. If **Hypertension Mode** is active, Sodium is restricted to < 1500mg.
             `;
             showMessageBox(title, message.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'), true);
@@ -717,7 +717,7 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
             }
 
             const results = lastCalculationResults;
-            const reportDate = new Date().toLocaleDateString(langCode === 'en' ? 'en-US' : 'en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+            const reportDate = new Date().toLocaleDateString({ en: 'en-IN', hi: 'hi-IN', te: 'te-IN' }[langCode] || 'en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
 
             const createProfileItem = (icon, label, value) => `<li class="profile-item">${icon}<span class="profile-label">${label}</span><span class="profile-value">${value}</span></li>`;
             const createMicroRow = (label, value) => `<tr class="micro-item"><td class="micro-label">${label}</td><td class="micro-value">${value}</td></tr>`;
@@ -935,9 +935,15 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
             return element;
         }
 
+        // ICMR-NIN 2020: FAO/WHO/UNU (2004) weight-based BMR equations, reduced by 10% (men) and 9% (women) for Indians.
+        // Check: 65 kg man -> 1504 kcal x PAL 1.4 = 2106 (ICMR table: 2110); 55 kg woman -> 1184 x 1.4 = 1658 (ICMR: 1660).
         function calculateBMR(weight, height, age, gender) {
-            let bmr = (10 * weight) + (6.25 * height) - (5 * age);
-            return Math.round(gender === 'male' ? bmr + 5 : bmr - 161);
+            const male = gender === 'male';
+            let bmr;
+            if (age < 30) bmr = male ? (15.057 * weight) + 692.2 : (14.818 * weight) + 486.6;
+            else if (age < 60) bmr = male ? (11.472 * weight) + 873.1 : (8.126 * weight) + 845.6;
+            else bmr = male ? (11.711 * weight) + 587.7 : (9.082 * weight) + 658.5;
+            return Math.round(bmr * (male ? 0.90 : 0.91));
         }
 
         function getBmiCategory(bmi) {
@@ -947,25 +953,37 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
             return "Obese";
         }
         
-        function getMicronutrientRDI(gender, pregnancyStatus, isHTN) {
+        // ICMR-NIN 2020 RDA / AI values for adults (18+ years).
+        function getMicronutrientRDI(gender, pregnancyStatus, isHTN, age, targetCalories, isCKD) {
             const isMale = gender === 'male';
             let rdi = {};
 
             if (isMale) {
-                rdi = { fiber: "40 g", sodium: "2000 mg", potassium: "3800 mg", iron: "19 mg", vitC: "80 mg", folate: "300 mcg", calcium: "1000 mg", magnesium: "385 mg" };
+                rdi = { sodium: "2000 mg", potassium: "3500 mg", iron: "19 mg", vitC: "80 mg", folate: "300 mcg", calcium: "1000 mg", magnesium: "440 mg" };
             } else {
-                rdi = { fiber: "30 g", sodium: "2000 mg", potassium: "3000 mg", iron: "29 mg", vitC: "65 mg", folate: "220 mcg", calcium: "1000 mg", magnesium: "355 mg" };
+                rdi = { sodium: "2000 mg", potassium: "3500 mg", iron: "29 mg", vitC: "65 mg", folate: "220 mcg", calcium: "1000 mg", magnesium: "370 mg" };
+            }
+
+            // Dietary fibre: ICMR-NIN 2020 gives ~30 g per 2000 kcal, so it scales with the energy target.
+            rdi.fiber = Math.round((targetCalories * 30) / 2000) + " g";
+
+            // Elderly (60+): calcium 1200 mg; women's iron drops to 19 mg.
+            if (age >= 60) {
+                rdi.calcium = "1200 mg";
+                if (!isMale) rdi.iron = "19 mg";
             }
 
             switch (pregnancyStatus) {
                 case '1st_trimester': case '2nd_trimester': case '3rd_trimester':
-                    rdi.iron = "27 mg"; rdi.vitC = "80 mg"; rdi.folate = "570 mcg"; break;
+                    rdi.iron = "27 mg"; rdi.vitC = "80 mg"; rdi.folate = "570 mcg"; rdi.calcium = "1000 mg"; rdi.magnesium = "440 mg"; break;
                 case 'lactating_0_6': case 'lactating_7_12':
-                    rdi.iron = "23 mg"; rdi.vitC = "115 mg"; rdi.folate = "330 mcg"; rdi.calcium = "1200 mg"; break;
+                    rdi.iron = "23 mg"; rdi.vitC = "115 mg"; rdi.folate = "330 mcg"; rdi.calcium = "1200 mg"; rdi.magnesium = "400 mg"; break;
             }
 
             // Step 4.2 Hypertension override
             if (isHTN) rdi.sodium = "< 1500 mg (HTN)";
+            // CKD: a general-population potassium target is not appropriate
+            if (isCKD) rdi.potassium = "Individualise (CKD)";
             return rdi;
         }
 
@@ -987,6 +1005,16 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
                 safeGetElement('printReportBtn').disabled = true;
                 safeGetElement('printReportBtn').classList.replace('bg-primary-color', 'bg-gray-400');
                 return showMessageBox("Input Error", "Please enter valid, positive values for age, height, and weight.");
+            }
+
+            // Values in this tool are ICMR-NIN 2020 adult values; reject inputs they do not cover.
+            let rangeError = '';
+            if (age < 18) rangeError = "This tool uses ICMR adult values (18 years and above). Children and adolescents have different requirements.";
+            else if (age > 110 || height < 100 || height > 250 || weight < 25 || weight > 300) rangeError = "Please check the values: age up to 110 years, height 100-250 cm, weight 25-300 kg.";
+            if (rangeError) {
+                safeGetElement('printReportBtn').disabled = true;
+                safeGetElement('printReportBtn').classList.replace('bg-primary-color', 'bg-gray-400');
+                return showMessageBox("Input Error", rangeError);
             }
 
             const heightMeters = height / 100;
@@ -1016,42 +1044,58 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
                 cutButtons.forEach(btn => { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); });
             }
 
-            const targetCalories = Math.round(tdee + calorieGoalModifier + pregMod.calories);
+            // BMI is not a valid target during pregnancy, so no "gain/lose X kg" hint.
+            if (gender === 'female' && pregnancyStatus.includes('trimester')) { weightDiff = 0; weightChangeType = 'normal'; }
+
+            // An underweight patient should not be put on a calorie deficit.
+            if (!isPregnantOrLactating && bmiCategory === 'Underweight' && goal.includes('cut')) {
+                goal = 'maintain'; setGoal('maintain'); calorieGoalModifier = 0;
+                showMessageBox("Goal Adjusted", "Weight loss goals are not appropriate for an underweight BMI. Switched to 'Maintain'.");
+            }
+
+            // Never prescribe below resting energy needs (BMR).
+            const targetCalories = Math.max(bmr, Math.round(tdee + calorieGoalModifier + pregMod.calories));
 
             // Calculate Macros
             let proteinGrams, fatGrams, carbGrams;
             let pPct = 15, fPct = 25, cPct = 60;
 
-            if (isCKD) {
-                // Step 4.2 CKD Mode: strictly 0.8g protein per kg
-                proteinGrams = Math.round(weight * 0.8);
-                const proteinCals = proteinGrams * 4;
-                const fatCals = targetCalories * 0.25; // Keep fat at 25%
-                fatGrams = Math.round(fatCals / 9);
-                const carbCals = targetCalories - (proteinCals + fatCals);
-                carbGrams = Math.round(carbCals / 4);
-                
-                // Recalculate true percentages for display
-                pPct = Math.round((proteinCals / targetCalories) * 100);
-                fPct = Math.round((fatCals / targetCalories) * 100);
-                cPct = 100 - pPct - fPct; 
+            // Fat stays at 25% of energy; carbohydrate takes whatever energy remains after protein and fat.
+            const proteinIncrement = isPregnantOrLactating ? (pregMod.protein || 0) : 0;
+            const rdaProtein = Math.round((weight * 0.83) + proteinIncrement); // ICMR-NIN 2020 RDA: 0.83 g/kg/day
+            const splitProtein = Math.round((targetCalories * 0.15) / 4);
+            const fatCals = targetCalories * 0.25;
+            fatGrams = Math.round(fatCals / 9);
 
+            if (isCKD) {
+                // Step 4.2 CKD Mode: 0.8g protein per kg (non-dialysis), plus any pregnancy/lactation increment
+                proteinGrams = Math.round((weight * 0.8) + proteinIncrement);
                 safeGetElement('proteinDetail').textContent = `grams / day (0.8g/kg for CKD)`;
-                safeGetElement('macroDisclaimer').textContent = `CKD Mode Active: Protein restricted to 0.8g/kg body weight.`;
+                safeGetElement('macroDisclaimer').textContent = `CKD Mode Active: Protein restricted to 0.8g/kg body weight (non-dialysis). Stage and dialysis status need clinician review.`;
+            } else if (rdaProtein > splitProtein) {
+                proteinGrams = rdaProtein;
+                safeGetElement('proteinDetail').textContent = `grams / day (ICMR RDA minimum)`;
+                safeGetElement('macroDisclaimer').textContent = `Protein raised to the ICMR (2020) RDA: 0.83g/kg` + (proteinIncrement > 0 ? ` + ${proteinIncrement}g for pregnancy/lactation` : '') + `. Fat 25%, remaining energy from carbs.`;
             } else {
-                proteinGrams = Math.round((targetCalories * 0.15) / 4);
-                fatGrams = Math.round((targetCalories * 0.25) / 9);
-                carbGrams = Math.round((targetCalories * 0.60) / 4);
+                proteinGrams = splitProtein;
                 safeGetElement('proteinDetail').textContent = `grams / day (4 kcal/g)`;
                 safeGetElement('macroDisclaimer').textContent = `ICMR (2020) Recommended Macro split: Protein 15%, Fat 25%, Carbs 60%.`;
             }
 
-            const rdi = getMicronutrientRDI(gender, pregnancyStatus, isHTN);
+            carbGrams = Math.max(0, Math.round((targetCalories - (proteinGrams * 4) - fatCals) / 4));
+            if (proteinGrams !== splitProtein) {
+                // Recalculate true percentages for display
+                pPct = Math.round(((proteinGrams * 4) / targetCalories) * 100);
+                fPct = 25;
+                cPct = 100 - pPct - fPct;
+            }
+
+            const rdi = getMicronutrientRDI(gender, pregnancyStatus, isHTN, age, targetCalories, isCKD);
 
             // Step 4.3 Food Exchange Estimate (Carbs -> Rotis/Rice, Protein -> Dal)
             const rotiEq = Math.round(carbGrams / 15);
             const dalEq = Math.round(proteinGrams / 7);
-            const foodExchangeText = `Based on macros, this equals roughly ~${rotiEq} Standard Rotis (or equivalent carbs) and ~${dalEq} Katoris of thick Dal/Paneer (or equivalent protein) spaced throughout the day.`;
+            const foodExchangeText = `Based on macros, this equals roughly ~${rotiEq} carbohydrate exchanges of 15g (1 small Roti or 1/2 Katori cooked Rice each; fruit, milk, dal and vegetables count towards these too) and ~${dalEq} protein exchanges of 7g (1 Katori thick Dal, 30g Paneer or 1 Egg each) spaced throughout the day.`;
             if(safeGetElement('foodExchangeText')) safeGetElement('foodExchangeText').textContent = foodExchangeText;
 
             lastCalculationResults = {
