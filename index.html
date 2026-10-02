@@ -503,7 +503,24 @@
                 macroTitle: "मैक्रोन्यूट्रिएंट्स", protein: "प्रोटीन", fat: "वसा", carbs: "कार्बोहाइड्रेट",
                 microTitle: "आवश्यक विटामिन्स/मिनरल्स", exchangeTitle: "भोजन विनिमय (Food Exchange)", 
                 profileTitle: "प्रोफ़ाइल", ageGen: "आयु / लिंग", ht: "ऊंचाई", wt: "वजन",
-                status: "स्थिति", act: "गतिविधि", footer: "गणना ICMR दिशानिर्देशों पर आधारित है। यह चिकित्सीय सलाह का विकल्प नहीं है।"
+                status: "स्थिति", act: "गतिविधि", footer: "गणना ICMR दिशानिर्देशों पर आधारित है। यह चिकित्सीय सलाह का विकल्प नहीं है।",
+                printBtn: "रिपोर्ट प्रिंट करें", male: "पुरुष", female: "महिला", ckdTag: "CKD मोड",
+                htnNa: "< 1500 mg (उच्च रक्तचाप)", ckdK: "डॉक्टर की सलाह अनुसार (CKD)",
+                bmiCat: { "Underweight": "कम वजन", "Normal Weight": "सामान्य वजन", "Overweight": "अधिक वजन", "Obese": "मोटापा" },
+                goals: {
+                    "maintain": "वजन बनाए रखें", "mild-cut": "धीरे-धीरे वजन घटाना (-250 kcal)", "aggressive-cut": "तेज़ी से वजन घटाना (-500 kcal)",
+                    "mild-bulk": "धीरे-धीरे मांसपेशी बढ़ाना (+250 kcal)", "aggressive-bulk": "तेज़ी से मांसपेशी बढ़ाना (+500 kcal)"
+                },
+                preg: {
+                    "1st_trimester": "गर्भवती (पहली तिमाही)", "2nd_trimester": "गर्भवती (दूसरी तिमाही)", "3rd_trimester": "गर्भवती (तीसरी तिमाही)",
+                    "lactating_0_6": "स्तनपान (0-6 माह)", "lactating_7_12": "स्तनपान (7-12 माह)"
+                },
+                activity: { "1.4": "कम सक्रिय (ज़्यादातर बैठे रहना)", "1.8": "मध्यम सक्रिय", "2.3": "भारी शारीरिक श्रम" },
+                micro: {
+                    fiber: "रेशा / फाइबर (AI)", sodium: "सोडियम (AI)", potassium: "पोटैशियम (AI)", iron: "आयरन / लौह (RDA)",
+                    vitC: "विटामिन C (RDA)", folate: "फोलेट (RDA)", calcium: "कैल्शियम (RDA)", magnesium: "मैग्नीशियम (RDA)"
+                },
+                exchange: (c, p) => `यह लगभग ~${c} कार्बोहाइड्रेट एक्सचेंज (15 ग्राम प्रत्येक: 1 छोटी रोटी या 1/2 कटोरी पके चावल; फल, दूध, दाल और सब्ज़ियाँ भी इसी में गिनी जाती हैं) और ~${p} प्रोटीन एक्सचेंज (7 ग्राम प्रत्येक: 1 कटोरी गाढ़ी दाल, 30 ग्राम पनीर या 1 अंडा) के बराबर है। इसे दिन भर में बाँटकर लें।`
             },
             te: {
                 title: "వ్యక్తిగత ఆరోగ్య నివేదిక", client: "రోగి పేరు", inst: "ఆసుపత్రి", date: "తేదీ",
@@ -513,7 +530,24 @@
                 macroTitle: "స్థూల పోషకాలు", protein: "ప్రోటీన్", fat: "కొవ్వు", carbs: "కార్బోహైడ్రేట్లు",
                 microTitle: "సూక్ష్మ పోషకాలు (RDAs)", exchangeTitle: "ఆహార మార్పిడి (Food Exchange)", 
                 profileTitle: "క్లయింట్ ప్రొఫైల్", ageGen: "వయస్సు / లింగం", ht: "ఎత్తు", wt: "బరువు",
-                status: "స్థితి", act: "శారీరక శ్రమ", footer: "ICMR మార్గదర్శకాల ఆధారంగా. ఇది వృత్తిపరమైన వైద్య సలహాకు ప్రత్యామ్నాయం కాదు."
+                status: "స్థితి", act: "శారీరక శ్రమ", footer: "ICMR మార్గదర్శకాల ఆధారంగా. ఇది వృత్తిపరమైన వైద్య సలహాకు ప్రత్యామ్నాయం కాదు.",
+                printBtn: "రిపోర్ట్ ప్రింట్ చేయండి", male: "పురుషుడు", female: "స్త్రీ", ckdTag: "CKD మోడ్",
+                htnNa: "< 1500 mg (అధిక రక్తపోటు)", ckdK: "వైద్యుని సలహా మేరకు (CKD)",
+                bmiCat: { "Underweight": "తక్కువ బరువు", "Normal Weight": "సాధారణ బరువు", "Overweight": "అధిక బరువు", "Obese": "ఊబకాయం" },
+                goals: {
+                    "maintain": "బరువును కొనసాగించడం", "mild-cut": "నెమ్మదిగా బరువు తగ్గడం (-250 kcal)", "aggressive-cut": "వేగంగా బరువు తగ్గడం (-500 kcal)",
+                    "mild-bulk": "నెమ్మదిగా కండరాలు పెంచడం (+250 kcal)", "aggressive-bulk": "వేగంగా కండరాలు పెంచడం (+500 kcal)"
+                },
+                preg: {
+                    "1st_trimester": "గర్భిణి (మొదటి త్రైమాసికం)", "2nd_trimester": "గర్భిణి (రెండవ త్రైమాసికం)", "3rd_trimester": "గర్భిణి (మూడవ త్రైమాసికం)",
+                    "lactating_0_6": "పాలిచ్చే తల్లి (0-6 నెలలు)", "lactating_7_12": "పాలిచ్చే తల్లి (7-12 నెలలు)"
+                },
+                activity: { "1.4": "తక్కువ శ్రమ (ఎక్కువగా కూర్చునే పని)", "1.8": "మధ్యస్థ శ్రమ", "2.3": "అధిక శారీరక శ్రమ" },
+                micro: {
+                    fiber: "పీచు పదార్థం (AI)", sodium: "సోడియం (AI)", potassium: "పొటాషియం (AI)", iron: "ఇనుము (RDA)",
+                    vitC: "విటమిన్ C (RDA)", folate: "ఫోలేట్ (RDA)", calcium: "కాల్షియం (RDA)", magnesium: "మెగ్నీషియం (RDA)"
+                },
+                exchange: (c, p) => `ఇది సుమారు ~${c} కార్బోహైడ్రేట్ ఎక్స్ఛేంజ్‌లు (ఒక్కొక్కటి 15 గ్రా: 1 చిన్న రొట్టె లేదా 1/2 కప్పు వండిన అన్నం; పండ్లు, పాలు, పప్పు, కూరగాయలు కూడా ఇందులోనే లెక్క) మరియు ~${p} ప్రోటీన్ ఎక్స్ఛేంజ్‌లకు (ఒక్కొక్కటి 7 గ్రా: 1 కప్పు చిక్కటి పప్పు, 30 గ్రా పనీర్ లేదా 1 గుడ్డు) సమానం. రోజంతా విభజించి తీసుకోండి.`
             }
         };
         
@@ -526,7 +560,7 @@
             'aggressive-bulk': 'Aggressive Muscle Gain (+500 kcal)'
         };
         // ICMR-NIN 2020 additional energy (kcal/d) and protein (g/d, RDA) in pregnancy and lactation.
-        // NOTE: 2nd-trimester protein increment is quoted as +7.6 (EAR) / +9.5 (RDA) - confirm against the printed table.
+        // Protein increments are the RDA column (EAR column: +7.6, +17.6, +13.6, +10.6).
         const pregnancyModifiers = {
             'none': { calories: 0, protein: 0, label: '' },
             '1st_trimester': { calories: 0, protein: 0, label: 'Pregnant (1st Trimester)' },
@@ -719,6 +753,19 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
             const results = lastCalculationResults;
             const reportDate = new Date().toLocaleDateString({ en: 'en-IN', hi: 'hi-IN', te: 'te-IN' }[langCode] || 'en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
 
+            // Translated values for the report. English (no extra keys) falls back to the on-screen text.
+            const tr = (map, key, fallback) => (map && map[key]) || fallback;
+            const bmiCategoryText = tr(t.bmiCat, results.bmiCategory, results.bmiCategory);
+            const goalText = t.goals
+                ? t.goals[results.goal] + (results.pregCalories > 0 ? ` + ${results.pregCalories} kcal` : '') + (results.isCKD ? ` [${t.ckdTag}]` : '')
+                : results.goalLabel;
+            const exchangeText = t.exchange ? t.exchange(results.rotiEq, results.dalEq) : results.foodExchangeText;
+            const genderText = results.gender === 'male' ? (t.male || 'M') : (t.female || 'F');
+            const statusText = tr(t.preg, results.pregnancyStatus, results.pregnancyStatusLabel);
+            const activityText = tr(t.activity, String(results.activity), results.activityLabel);
+            const sodiumText = (results.isHTN && t.htnNa) ? t.htnNa : results.rdi.sodium;
+            const potassiumText = (results.isCKD && t.ckdK) ? t.ckdK : results.rdi.potassium;
+
             const createProfileItem = (icon, label, value) => `<li class="profile-item">${icon}<span class="profile-label">${label}</span><span class="profile-value">${value}</span></li>`;
             const createMicroRow = (label, value) => `<tr class="micro-item"><td class="micro-label">${label}</td><td class="micro-value">${value}</td></tr>`;
             
@@ -808,7 +855,7 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
                             <symbol id="icon-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12.22 18H3.78a2 2 0 0 1-1.79-1.11L.01 12.11c-.1-.24-.1-.5 0-.74l1.98-4.76A2 2 0 0 1 3.78 6h8.44c.42 0 .82.14 1.14.38l6.34 4.26c.4.27.64.71.64 1.18v0c0 .47-.24.91-.64 1.18l-6.34 4.26a2 2 0 0 1-1.14.38z"></path><path d="m21.99 12.11-1.98-4.76"></path><path d="M3.78 6l1.98 4.76"></path><path d="M12 12h.01"></path></symbol>
                         </defs>
                     </svg>
-                    <div class="print-btn-container"><button class="print-btn" onclick="window.print()">Print Report</button></div>
+                    <div class="print-btn-container"><button class="print-btn" onclick="window.print()">${t.printBtn || 'Print Report'}</button></div>
                     <div class="container">
                         <header class="header">
                             <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="#375d81" stroke-width="1.5"><path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /><path d="M12 7.5h.008v.008H12V7.5z" /></svg>
@@ -823,7 +870,7 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
                             <div class="main-column">
                                 <div class="bmi-status-box ${bmiStatusStyle.class}" style="color: ${bmiStatusStyle.color}; border-color: ${bmiStatusStyle.color};">
                                     <div class="label">${t.bmiStatus}</div>
-                                    <div class="value">${results.bmiCategory}</div>
+                                    <div class="value">${bmiCategoryText}</div>
                                 </div>
                                 <div class="stats-grid">
                                     ${createStatBox(t.bmiLabel, results.bmi, '', '#06b6d4')}
@@ -835,7 +882,7 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
                                     <div class="card-body">
                                         <div class="value">${results.targetCalories} <span style="font-size: 1.5rem; font-weight: normal;">kcal</span></div>
                                         <div class="label">${t.targetSub}</div>
-                                        <div class="status">${results.goalLabel}</div>
+                                        <div class="status">${goalText}</div>
                                     </div>
                                 </div>
                                 <div class="card">
@@ -856,7 +903,7 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
                                             </li>
                                         </ul>
                                         <div class="exchange-box">
-                                            <strong>${t.exchangeTitle}:</strong><br/>${results.foodExchangeText}
+                                            <strong>${t.exchangeTitle}:</strong><br/>${exchangeText}
                                         </div>
                                     </div>
                                 </div>
@@ -866,11 +913,11 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
                                     <div class="card-header"><h2 class="card-title">${t.profileTitle}</h2></div>
                                     <div class="card-body" style="padding: 10px 20px;">
                                         <ul class="profile-list">
-                                            ${createProfileItem('<svg class="profile-icon"><use href="#icon-user"></use></svg>', t.ageGen, `${results.age} / ${results.gender === 'male' ? 'M' : 'F'}`)}
+                                            ${createProfileItem('<svg class="profile-icon"><use href="#icon-user"></use></svg>', t.ageGen, `${results.age} / ${genderText}`)}
                                             ${createProfileItem('<svg class="profile-icon"><use href="#icon-height"></use></svg>', t.ht, `${results.height} cm`)}
                                             ${createProfileItem('<svg class="profile-icon"><use href="#icon-weight"></use></svg>', t.wt, `${results.weight} kg`)}
-                                            ${results.pregnancyStatusLabel ? createProfileItem('<svg class="profile-icon"><use href="#icon-user"></use></svg>', t.status, `${results.pregnancyStatusLabel}`) : ''}
-                                            ${createProfileItem('<svg class="profile-icon"><use href="#icon-activity"></use></svg>', t.act, `${results.activityLabel}`)}
+                                            ${results.pregnancyStatusLabel ? createProfileItem('<svg class="profile-icon"><use href="#icon-user"></use></svg>', t.status, statusText) : ''}
+                                            ${createProfileItem('<svg class="profile-icon"><use href="#icon-activity"></use></svg>', t.act, activityText)}
                                         </ul>
                                     </div>
                                 </div>
@@ -879,14 +926,14 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
                                     <div class="card-body" style="padding: 10px 20px;">
                                         <table class="micro-table">
                                             <tbody>
-                                                ${createMicroRow('Fiber (AI)', results.rdi.fiber)}
-                                                ${createMicroRow('Sodium (AI)', results.rdi.sodium)}
-                                                ${createMicroRow('Potassium (AI)', results.rdi.potassium)}
-                                                ${createMicroRow('Iron (RDA)', results.rdi.iron)}
-                                                ${createMicroRow('Vitamin C (RDA)', results.rdi.vitC)}
-                                                ${createMicroRow('Folate (RDA)', results.rdi.folate)}
-                                                ${createMicroRow('Calcium (RDA)', results.rdi.calcium)}
-                                                ${createMicroRow('Magnesium (RDA)', results.rdi.magnesium)}
+                                                ${createMicroRow(tr(t.micro, 'fiber', 'Fiber (AI)'), results.rdi.fiber)}
+                                                ${createMicroRow(tr(t.micro, 'sodium', 'Sodium (AI)'), sodiumText)}
+                                                ${createMicroRow(tr(t.micro, 'potassium', 'Potassium (AI)'), potassiumText)}
+                                                ${createMicroRow(tr(t.micro, 'iron', 'Iron (RDA)'), results.rdi.iron)}
+                                                ${createMicroRow(tr(t.micro, 'vitC', 'Vitamin C (RDA)'), results.rdi.vitC)}
+                                                ${createMicroRow(tr(t.micro, 'folate', 'Folate (RDA)'), results.rdi.folate)}
+                                                ${createMicroRow(tr(t.micro, 'calcium', 'Calcium (RDA)'), results.rdi.calcium)}
+                                                ${createMicroRow(tr(t.micro, 'magnesium', 'Magnesium (RDA)'), results.rdi.magnesium)}
                                             </tbody>
                                         </table>
                                     </div>
@@ -1100,7 +1147,7 @@ Calculations follow **ICMR (2020) Guidelines for Indians**.
 
             lastCalculationResults = {
                 age, gender, height, weight, activity: activityFactor, activityLabel, goal, 
-                pregnancyStatusLabel: pregMod.label, bmi: roundedBmi, bmiCategory, weightDiff, weightChangeType, 
+                pregnancyStatusLabel: pregMod.label, pregnancyStatus, pregCalories: pregMod.calories, isCKD, isHTN, rotiEq, dalEq, bmi: roundedBmi, bmiCategory, weightDiff, weightChangeType, 
                 bmr, tdee, targetCalories, proteinGrams, fatGrams, carbGrams, rdi,
                 proteinPercent: pPct, fatPercent: fPct, carbsPercent: cPct, foodExchangeText,
                 goalLabel: goalLabels[goal] + (pregMod.calories > 0 ? ` + ${pregMod.calories} kcal` : '') + (isCKD ? " [CKD Mode]" : "")
