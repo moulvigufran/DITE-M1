@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DITE-M1 calculation tests</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; color: #222; }
+  h1 { font-size: 20px; }
+  #summary { font-size: 18px; font-weight: bold; margin: 12px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  td, th { border: 1px solid #ccc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  .pass { color: #15803d; font-weight: bold; }
+  .fail { color: #b91c1c; font-weight: bold; }
+  iframe { width: 1px; height: 1px; border: 0; position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<h1>DITE-M1 calculation tests</h1>
+<p>Each case loads the real calculator (index.html), enters the inputs, and compares the output with ICMR-NIN 2020 reference values.</p>
+<div id="summary">Running...</div>
+<table><thead><tr><th>Case</th><th>Result</th><th>Details</th></tr></thead><tbody id="rows"></tbody></table>
+
+<script>
+// Reference energy values are from the ICMR-NIN 2020 RDA table (65 kg man, 55 kg woman).
+// "tol" is the allowed difference in kcal, because ICMR rounds its table values.
+const base = { age: 25, gender: 'male', height: 170, weight: 65, activity: '1.40' };
+const woman = { age: 25, gender: 'female', height: 160, weight: 55, activity: '1.40' };
+
+const cases = [
+  { name: 'Reference man, sedentary = 2110 kcal', input: base, expect: { tdee: [2110, 15], iron: '19 mg', magnesium: '440 mg', potassium: '3500 mg' } },
+  { name: 'Reference man, moderate = 2710 kcal', input: { ...base, activity: '1.80' }, expect: { tdee: [2710, 15] } },
+  { name: 'Reference man, heavy = 3470 kcal', input: { ...base, activity: '2.30' }, expect: { tdee: [3470, 15] } },
+  { name: 'Reference woman, sedentary = 1660 kcal', input: woman, expect: { tdee: [1660, 15], iron: '29 mg', magnesium: '370 mg', folate: '220 mcg' } },
+  { name: 'Reference woman, moderate = 2130 kcal', input: { ...woman, activity: '1.80' }, expect: { tdee: [2130, 15] } },
+  { name: 'Reference woman, heavy = 2720 kcal', input: { ...woman, activity: '2.30' }, expect: { tdee: [2720, 15] } },
+  { name: 'Man 60+, sedentary = 1700 kcal, calcium 1200', input: { ...base, age: 65 }, expect: { tdee: [1700, 15], calcium: '1200 mg' } },
+  { name: 'Woman 60+, sedentary = 1500 kcal, iron 19', input: { ...woman, age: 65 }, expect: { tdee: [1500, 30], calcium: '1200 mg', iron: '19 mg' } },
+  { name: 'Pregnancy 2nd trimester: +350 kcal', input: { ...woman, preg: '2nd_trimester' }, expect: { targetMinusTdee: 350, iron: '27 mg', folate: '570 mcg', vitc: '80 mg', magnesium: '440 mg' } },
+  { name: 'Pregnancy 3rd trimester: +350 kcal', input: { ...woman, preg: '3rd_trimester' }, expect: { targetMinusTdee: 350 } },
+  { name: 'Pregnancy 1st trimester: no extra energy', input: { ...woman, preg: '1st_trimester' }, expect: { targetMinusTdee: 0, folate: '570 mcg' } },
+  { name: 'Lactation 0-6 months: +600 kcal', input: { ...woman, preg: 'lactating_0_6' }, expect: { targetMinusTdee: 600, calcium: '1200 mg', vitc: '115 mg', iron: '23 mg', magnesium: '400 mg', folate: '330 mcg' } },
+  { name: 'Lactation 7-12 months: +520 kcal', input: { ...woman, preg: 'lactating_7_12' }, expect: { targetMinusTdee: 520 } },
+  { name: 'Protein floor: 80 kg woman, 3rd trimester = 0.83 g/kg + 22 g', input: { age: 35, gender: 'female', height: 160, weight: 80, activity: '1.40', preg: '3rd_trimester' }, expect: { protein: 88 } },
+  { name: 'Protein is 15% of energy when above the RDA', input: base, expect: { protein: 79 } },
+  { name: 'CKD mode: 0.8 g/kg protein, potassium individualised', input: { ...base, age: 50, weight: 70, ckd: true }, expect: { protein: 56, potassium: 'Individualise (CKD)' } },
+  { name: 'Hypertension mode: sodium below 1500 mg', input: { ...base, htn: true }, expect: { sodiumContains: '1500' } },
+  { name: 'Underweight + aggressive cut is switched to maintain', input: { age: 22, gender: 'female', height: 165, weight: 42, activity: '1.40', goal: 'aggressive-cut' }, expect: { targetMinusTdee: 0, bmiStatus: 'Underweight' } },
+  { name: 'Target never goes below BMR', input: { age: 45, gender: 'female', height: 150, weight: 60, activity: '1.40', goal: 'aggressive-cut' }, expect: { targetEqualsBmr: true } },
+  { name: 'Mild cut = -250 kcal', input: { ...base, weight: 80, goal: 'mild-cut' }, expect: { targetMinusTdee: -250 } },
+  { name: 'Aggressive bulk = +500 kcal', input: { ...base, goal: 'aggressive-bulk' }, expect: { targetMinusTdee: 500 } },
+  { name: 'Asian BMI cut-offs: 23.0 is Overweight', input: { ...base, height: 170, weight: 66.5 }, expect: { bmiStatus: 'Overweight' } },
+  { name: 'Asian BMI cut-offs: 25.0 is Obese', input: { ...base, height: 170, weight: 72.3 }, expect: { bmiStatus: 'Obese' } },
+  { name: 'Age below 18 is rejected', input: { ...base, age: 12, height: 150, weight: 40 }, expect: { error: '18 years' } },
+  { name: 'Impossible height is rejected', input: { ...base, height: 20 }, expect: { error: 'check the values' } },
+];
+
+function loadCalculator() {
+  return new Promise((resolve) => {
+    const frame = document.createElement('iframe');
+    frame.onload = () => resolve(frame);
+    frame.src = 'index.html?test=' + Date.now() + Math.random();
+    document.body.appendChild(frame);
+  });
+}
+
+const num = (text) => parseFloat(String(text).replace(/[^0-9.\-]/g, ''));
+
+async function runCase(c) {
+  const frame = await loadCalculator();
+  const win = frame.contentWindow, doc = frame.contentDocument;
+  const get = (id) => doc.getElementById(id);
+  const i = c.input;
+
+  get('gender').value = i.gender;
+  get('gender').dispatchEvent(new win.Event('change'));
+  get('age').value = i.age; get('height').value = i.height; get('weight').value = i.weight;
+  get('activity').value = i.activity;
+  if (i.preg) get('pregnancyStatus').value = i.preg;
+  if (i.ckd) get('ckdMode').checked = true;
+  if (i.htn) get('hypertensionMode').checked = true;
+  if (i.goal) win.setGoal(i.goal);
+  win.calculateMacros();
+
+  const shown = !get('results').classList.contains('hidden');
+  const out = {
+    bmr: num(get('bmrResult').textContent), tdee: num(get('tdeeResult').textContent),
+    target: num(get('targetCalories').textContent), protein: num(get('proteinResult').textContent),
+    fat: num(get('fatResult').textContent), carbs: num(get('carbResult').textContent),
+    bmiStatus: get('bmiStatusText').textContent, message: get('messageText').textContent,
+  };
+  ['fiber', 'sodium', 'potassium', 'iron', 'vitc', 'folate', 'calcium', 'magnesium'].forEach((n) => { out[n] = get(n + 'RDI').textContent; });
+
+  const problems = [];
+  const e = c.expect;
+  if (e.error !== undefined) {
+    if (shown) problems.push('results were shown, expected an error');
+    if (!out.message.includes(e.error)) problems.push(`error message was "${out.message}"`);
+  } else {
+    if (!shown) problems.push(`no results shown (message: "${out.message}")`);
+    if (e.tdee && Math.abs(out.tdee - e.tdee[0]) > e.tdee[1]) problems.push(`energy ${out.tdee}, expected ${e.tdee[0]} ± ${e.tdee[1]}`);
+    if (e.targetMinusTdee !== undefined && out.target - out.tdee !== e.targetMinusTdee) problems.push(`target - maintenance = ${out.target - out.tdee}, expected ${e.targetMinusTdee}`);
+    if (e.targetEqualsBmr && out.target !== out.bmr) problems.push(`target ${out.target}, expected BMR ${out.bmr}`);
+    if (e.protein !== undefined && out.protein !== e.protein) problems.push(`protein ${out.protein} g, expected ${e.protein} g`);
+    if (e.bmiStatus && out.bmiStatus !== e.bmiStatus) problems.push(`BMI status "${out.bmiStatus}", expected "${e.bmiStatus}"`);
+    if (e.sodiumContains && !out.sodium.includes(e.sodiumContains)) problems.push(`sodium "${out.sodium}"`);
+    ['iron', 'folate', 'calcium', 'magnesium', 'potassium', 'vitc'].forEach((n) => {
+      if (e[n] && out[n] !== e[n]) problems.push(`${n} "${out[n]}", expected "${e[n]}"`);
+    });
+    // Every plan: macros must add up to the calorie target (within 2%), and target must not be below BMR
+    const macroKcal = out.protein * 4 + out.fat * 9 + out.carbs * 4;
+    if (Math.abs(macroKcal - out.target) > out.target * 0.02) problems.push(`macros add up to ${macroKcal} kcal, target is ${out.target}`);
+    if (out.target < out.bmr) problems.push(`target ${out.target} is below BMR ${out.bmr}`);
+  }
+  frame.remove();
+  return { problems, out };
+}
+
+(async () => {
+  let failed = 0;
+  for (const c of cases) {
+    let result;
+    try { result = await runCase(c); } catch (err) { result = { problems: ['test crashed: ' + err.message], out: {} }; }
+    const ok = result.problems.length === 0;
+    if (!ok) failed++;
+    const row = document.createElement('tr');
+    const detail = ok ? `BMR ${result.out.bmr}, maintenance ${result.out.tdee}, target ${result.out.target}, protein ${result.out.protein} g` : result.problems.join('; ');
+    [c.name, ok ? 'PASS' : 'FAIL', detail].forEach((text, idx) => {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      if (idx === 1) cell.className = ok ? 'pass' : 'fail';
+      row.appendChild(cell);
+    });
+    document.getElementById('rows').appendChild(row);
+  }
+  const summary = document.getElementById('summary');
+  summary.textContent = failed === 0 ? `All ${cases.length} tests passed` : `${failed} of ${cases.length} tests FAILED`;
+  summary.className = failed === 0 ? 'pass' : 'fail';
+})();
+</script>
+</body>
+</html>
